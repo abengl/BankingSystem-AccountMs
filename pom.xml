@@ -164,7 +164,11 @@
                 <artifactId>maven-checkstyle-plugin</artifactId>
                 <version>3.6.0</version>
                 <configuration>
+                    <sourceDirectories>
+                        <sourceDirectory>${project.build.sourceDirectory}</sourceDirectory>
+                    </sourceDirectories>
                     <configLocation>${project.basedir}/src/main/resources/checkstyle.xml</configLocation>
+                    <excludeGeneratedSources>true</excludeGeneratedSources>
                 </configuration>
                 <executions>
                     <execution>
@@ -201,9 +205,12 @@
                                 <exclude>**/com/alessandragodoy/accountms/utility/**</exclude>
                                 <exclude>**/com/alessandragodoy/accountms/adapter/**</exclude>
                                 <exclude>**/com/alessandragodoy/accountms/model/**</exclude>
+                                <exclude>**/com/alessandragodoy/accountms/controller/dto/TransactionRequestDTO*</exclude>
                                 <exclude>**/com/alessandragodoy/accountms/api/**</exclude>
                                 <exclude>**/com/alessandragodoy/accountms/model/AccountDTO*</exclude>
-                                <exclude>**/com/alessandragodoy/accountms/CustomerMsApplication*</exclude>
+                                <exclude>**/com/alessandragodoy/accountms/AccountmsApplication*</exclude>
+                                <exclude>**/com/alessandragodoy/accountms/model/TransactionRequestDTO*</exclude>
+                                <exclude>**/com/alessandragodoy/accountms/model/CreateAccountDTO*</exclude>
                             </excludes>
                         </configuration>
                     </execution>
