@@ -27,7 +27,10 @@ public class AccountMapper {
 				null,
 				createAccountDTO.balance(),
 				AccountType.valueOf(createAccountDTO.accountType().toUpperCase()),
-				createAccountDTO.customerId()
+				createAccountDTO.customerId(),
+				null,
+				null,
+				true
 		);
 	}
 }
