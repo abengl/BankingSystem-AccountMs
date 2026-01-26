@@ -70,17 +70,4 @@ public class AccountValidation {
 		}
 	}
 
-	/**
-	 * Validates the account data in the CreateAccountDTO.
-	 *
-	 * @param createAccountDTO the DTO containing the account data to validate.
-	 * @throws AccountValidationException if any required field is missing or invalid.
-	 */
-	public void validateAccountData(CreateAccountDTO createAccountDTO) {
-		if ((createAccountDTO.balance() == null) || (createAccountDTO.accountType() == null) || createAccountDTO.accountType()
-				.isEmpty() || (createAccountDTO.customerId() == null)) {
-			throw new AccountValidationException("Balance, account type, and customer id are required fields.");
-		}
-	}
-
 }

@@ -1,24 +1,23 @@
 package com.alessandragodoy.accountms.service;
 
-import com.alessandragodoy.accountms.controller.dto.AccountDTO;
-import com.alessandragodoy.accountms.controller.dto.CreateAccountDTO;
 import com.alessandragodoy.accountms.exception.AccountNotFoundException;
 import com.alessandragodoy.accountms.exception.AccountValidationException;
 import com.alessandragodoy.accountms.exception.CustomerNotFoundException;
 import com.alessandragodoy.accountms.exception.InsufficientFundsException;
+import com.alessandragodoy.accountms.model.Account;
 
 import java.util.List;
 
 /**
  * Service interface for managing accounts.
  */
-public interface AccountService {
+public interface IAccountService {
 	/**
-	 * Retrieves all accounts.
+	 * Retrieves all active accounts.
 	 *
-	 * @return a list of all account DTOs
+	 * @return {@code List<AccountDTO>} a list of all account DTOs
 	 */
-	List<AccountDTO> getAllAccounts();
+	List<Account> getAllActiveAccounts() throws Exception;
 
 	/**
 	 * Retrieves an account by its ID.
@@ -27,16 +26,16 @@ public interface AccountService {
 	 * @return the account DTO if found
 	 * @throws AccountNotFoundException if the account is not found
 	 */
-	AccountDTO getAccountById(Integer accountId);
+	Account getAccountById(Integer accountId) throws Exception;
 
 	/**
 	 * Creates a new account.
 	 *
-	 * @param createAccountDTO the DTO containing account creation details
+	 * @param createAccount the DTO containing account creation details
 	 * @return the created account DTO
 	 * @throws CustomerNotFoundException if the customer is not found
 	 */
-	AccountDTO createAccount(CreateAccountDTO createAccountDTO);
+	Account createAccount(Account createAccount) throws Exception;
 
 	/**
 	 * Deposits an amount into an account.
@@ -47,7 +46,7 @@ public interface AccountService {
 	 * @throws AccountNotFoundException   if the account is not found
 	 * @throws AccountValidationException if the amount is invalid
 	 */
-	AccountDTO deposit(Integer accountId, Double amount);
+	Account deposit(Integer accountId, Double amount);
 
 	/**
 	 * Withdraws an amount from an account.
@@ -59,16 +58,15 @@ public interface AccountService {
 	 * @throws AccountValidationException if the amount is invalid
 	 * @throws InsufficientFundsException if there are insufficient funds for the withdrawal
 	 */
-	AccountDTO withdraw(Integer accountId, Double amount);
+	Account withdraw(Integer accountId, Double amount);
 
 	/**
 	 * Deletes an account by its ID.
 	 *
 	 * @param accountId the ID of the account
-	 * @return the deleted account DTO
 	 * @throws AccountNotFoundException if the account is not found
 	 */
-	AccountDTO deleteAccountById(Integer accountId);
+	void deleteAccountById(Integer accountId) throws Exception;
 
 	/**
 	 * Checks if active account exists for a given customer ID.
@@ -76,7 +74,7 @@ public interface AccountService {
 	 * @param customerId the ID of the customer
 	 * @return true if an account exists, false otherwise
 	 */
-	boolean activeAccountExists(Integer customerId);
+	boolean accountIsActiveByCustomerId(Integer customerId) throws Exception;
 
 	/**
 	 * Retrieves the balance of an account by its account number.
@@ -85,7 +83,7 @@ public interface AccountService {
 	 * @return the balance of the account
 	 * @throws AccountNotFoundException if the account is not found
 	 */
-	Double getAccountBalance(String accountNumber);
+	double getAccountBalance(String accountNumber) throws Exception;
 
 	/**
 	 * Checks if an account exists by its account number.
@@ -93,7 +91,7 @@ public interface AccountService {
 	 * @param accountNumber the account number
 	 * @return true if an account exists, false otherwise
 	 */
-	boolean accountExistsByAccountNumber(String accountNumber);
+	boolean accountExistsByAccountNumber(String accountNumber) throws Exception;
 
 	/**
 	 * Updates the balance of an account by its account number.
@@ -103,4 +101,16 @@ public interface AccountService {
 	 * @throws AccountNotFoundException if the account is not found
 	 */
 	void updateBalanceByAccountNumber(String accountNumber, Double amount);
+
+	Account activateAccount(Integer accountId) throws Exception;
+
+	Account deactivateAccount(Integer accountId) throws Exception;
+
+	List<Account> getAccountsByCustomerId(Integer customerId) throws Exception;
+
+	double getBalanceByAccountId(Integer accountId) throws Exception;
+
+	boolean accountIsActiveByAccountId(Integer accountId) throws Exception;
+
+	void updateBalanceByAccountId(Integer accountId, Double amount) throws Exception;
 }

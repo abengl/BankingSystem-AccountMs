@@ -2,15 +2,19 @@ package com.alessandragodoy.accountms.controller;
 
 import com.alessandragodoy.accountms.controller.dto.AccountDTO;
 import com.alessandragodoy.accountms.controller.dto.CreateAccountDTO;
-import com.alessandragodoy.accountms.controller.dto.TransactionRequestDTO;
-import com.alessandragodoy.accountms.service.AccountService;
+import com.alessandragodoy.accountms.model.Account;
+import com.alessandragodoy.accountms.service.IAccountService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+
+import static com.alessandragodoy.accountms.utility.DTOMapper.convertToDTO;
+import static com.alessandragodoy.accountms.utility.DTOMapper.convertToEntity;
 
 /**
  * Controller for managing accounts.
@@ -20,7 +24,8 @@ import java.util.List;
 @RequestMapping("/api/v1/accounts")
 @Tag(name = "Accounts", description = "Controller for Account")
 public class AccountController {
-	private final AccountService accountService;
+
+	private final IAccountService accountService;
 
 	/**
 	 * Retrieves all active accounts.
@@ -33,7 +38,9 @@ public class AccountController {
 	@GetMapping
 	public ResponseEntity<List<AccountDTO>> getAllAccounts() throws Exception {
 
-		List<AccountDTO> accounts = accountService.getAllAccounts();
+		List<AccountDTO> accounts = accountService.getAllActiveAccounts()
+				.stream()
+				.map(account -> convertToDTO(account, AccountDTO.class)).toList();
 
 		return ResponseEntity.ok(accounts);
 	}
@@ -45,15 +52,15 @@ public class AccountController {
 	 * @return a {@code ResponseEntity<AccountDTO>} containing the account.
 	 * @throws Exception if an error occurs while retrieving the account.
 	 */
-	@Operation(summary = "Retrieve account by its id", description = "Returns the found account as" +
-			" AccountDTO")
+	@Operation(summary = "Retrieve account by its id", description = "Returns the found account " +
+			"as AccountDTO")
 	@GetMapping("/{accountId}")
 	public ResponseEntity<AccountDTO> getAccountById(@PathVariable Integer accountId)
 			throws Exception {
 
-		AccountDTO account = accountService.getAccountById(accountId);
+		Account account = accountService.getAccountById(accountId);
 
-		return ResponseEntity.ok(account);
+		return ResponseEntity.ok(convertToDTO(account, AccountDTO.class));
 	}
 
 	/**
@@ -69,9 +76,11 @@ public class AccountController {
 	public ResponseEntity<AccountDTO> createAccount(@RequestBody CreateAccountDTO createAccountDTO)
 			throws Exception {
 
-		AccountDTO account = accountService.createAccount(createAccountDTO);
+		Account account =
+				accountService.createAccount(convertToEntity(createAccountDTO, Account.class));
 
-		return ResponseEntity.ok(account);
+		return ResponseEntity.status(HttpStatus.CREATED)
+				.body(convertToDTO(account, AccountDTO.class));
 	}
 
 	/**
@@ -87,9 +96,9 @@ public class AccountController {
 	public ResponseEntity<AccountDTO> activateAccount(@PathVariable Integer accountId)
 			throws Exception {
 
-		AccountDTO activatedAccount = accountService.activateAccount(accountId);
+		Account activatedAccount = accountService.activateAccount(accountId);
 
-		return ResponseEntity.ok(activatedAccount);
+		return ResponseEntity.ok(convertToDTO(activatedAccount, AccountDTO.class));
 	}
 
 	/**
@@ -99,15 +108,15 @@ public class AccountController {
 	 * @return a {@code ResponseEntity<AccountDTO>} containing the deactivated account.
 	 * @throws Exception if an error occurs while deactivating the account.
 	 */
-	@Operation(summary = "Deactivate an account by its id", description = "Returns the deactivated" +
-			" account as AccountDTO")
+	@Operation(summary = "Deactivate an account by its id", description = "Returns the " +
+			"deactivated account as AccountDTO")
 	@PatchMapping("/deactivate/{accountId}")
 	public ResponseEntity<AccountDTO> deactivateAccount(@PathVariable Integer accountId)
 			throws Exception {
 
-		AccountDTO deactivatedAccount = accountService.deactivateAccount(accountId);
+		Account deactivatedAccount = accountService.deactivateAccount(accountId);
 
-		return ResponseEntity.ok(deactivatedAccount);
+		return ResponseEntity.ok(convertToDTO(deactivatedAccount, AccountDTO.class));
 	}
 
 	/**
@@ -124,7 +133,9 @@ public class AccountController {
 			@PathVariable Integer customerId) throws
 			Exception {
 
-		List<AccountDTO> accounts = accountService.getAccountsByCustomerId(customerId);
+		List<AccountDTO> accounts = accountService.getAccountsByCustomerId(customerId)
+				.stream()
+				.map(account -> convertToDTO(account, AccountDTO.class)).toList();
 
 		return ResponseEntity.ok(accounts);
 	}
@@ -142,9 +153,9 @@ public class AccountController {
 	public ResponseEntity<AccountDTO> deleteAccountById(@PathVariable Integer accountId) throws
 			Exception {
 
-		AccountDTO deletedAccount = accountService.deleteAccountById(accountId);
+		accountService.deleteAccountById(accountId);
 
-		return ResponseEntity.ok(deletedAccount);
+		return ResponseEntity.noContent().build();
 	}
 
 	/**
@@ -177,9 +188,9 @@ public class AccountController {
 	public ResponseEntity<Boolean> accountIsActive(@PathVariable Integer accountId)
 			throws Exception {
 
-		Boolean status = accountService.accountIsActive(accountId);
+		Boolean active = accountService.accountIsActiveByAccountId(accountId);
 
-		return ResponseEntity.ok(status);
+		return ResponseEntity.ok(active);
 	}
 
 	@PatchMapping("/update-balance/{accountId}")
@@ -193,96 +204,17 @@ public class AccountController {
 	 * Checks if active accounts exist for a given customer ID.
 	 *
 	 * @param customerId the ID of the customer
-	 * @return true if active account exist, false otherwise
+	 * @return {@code ResponseEntity<Boolean>} true if active accounts exist, false otherwise
 	 * @throws Exception if an error occurs while checking for active accounts
 	 */
 	@Operation(summary = "Verify if a customer has active accounts by its id", description =
 			"Returns boolean")
 	@GetMapping("/active/{customerId}")
-	public boolean getAccountByCustomerId(@PathVariable Integer customerId) throws Exception {
-		return accountService.activeAccountExists(customerId);
-	}
+	public ResponseEntity<Boolean> getAccountByCustomerId(@PathVariable Integer customerId) throws Exception {
 
+		Boolean activeAccounts = accountService.accountIsActiveByCustomerId(customerId);
 
-	/* todo: remove methods below if not necessary */
-	/**
-	 * Updates the balance of an account by its account number.
-	 *
-	 * @param accountNumber the account number of the account to update the balance for.
-	 * @param amount        the amount to update the balance by.
-	 * @return a ResponseEntity indicating the success of the operation.
-	 */
-	@Operation(summary = "Updates the account balance by its account number", description =
-			"Returns a String of " +
-					"completion")
-	@PatchMapping("/update/{accountNumber}")
-	public ResponseEntity<String> updateBalanceByAccountNumber(@PathVariable String accountNumber,
-															   @RequestParam Double amount) {
-		accountService.updateBalanceByAccountNumber(accountNumber, amount);
-		return ResponseEntity.ok("Balance updated successfully");
-	}
-
-	/**
-	 * Deposits an amount into the account with the given ID.
-	 *
-	 * @param accountId             the ID of the account to deposit into.
-	 * @param transactionRequestDTO the data transfer object containing the deposit amount.
-	 * @return a ResponseEntity containing the updated AccountDTO object.
-	 */
-	@Operation(summary = "Deposit into an account", description = "Returns the account updated as " +
-			"AccountDTO")
-	@PutMapping("/deposit/{accountId}")
-	public ResponseEntity<AccountDTO> deposit(@PathVariable Integer accountId,
-											  @RequestBody TransactionRequestDTO transactionRequestDTO) {
-		AccountDTO updatedAccount =
-				accountService.deposit(accountId, transactionRequestDTO.amount());
-		return ResponseEntity.ok(updatedAccount);
-	}
-
-	/**
-	 * Withdraws an amount from the account with the given ID.
-	 *
-	 * @param accountId             the ID of the account to withdraw from.
-	 * @param transactionRequestDTO the data transfer object containing the withdrawal amount.
-	 * @return a ResponseEntity containing the updated AccountDTO object.
-	 */
-	@Operation(summary = "Withdraw into an account", description = "Returns the account updated as" +
-			" AccountDTO")
-	@PutMapping("/withdraw/{accountId}")
-	public ResponseEntity<AccountDTO> withdraw(@PathVariable Integer accountId,
-											   @RequestBody TransactionRequestDTO transactionRequestDTO) {
-		AccountDTO updatedAccount =
-				accountService.withdraw(accountId, transactionRequestDTO.amount());
-		return ResponseEntity.ok(updatedAccount);
-	}
-
-	/**
-	 * Retrieves the balance of an account by its account number.
-	 *
-	 * @param accountNumber the account number of the account to retrieve the balance for.
-	 * @return a ResponseEntity containing the account balance.
-	 */
-	@Operation(summary = "Obtains the account balance by its account number", description =
-			"Returns a double")
-	@GetMapping("/balance/{accountNumber}")
-	public ResponseEntity<Double> getAccountBalance(@PathVariable String accountNumber) {
-		Double balance = accountService.getAccountBalance(accountNumber);
-		return ResponseEntity.ok(balance);
-	}
-
-	/**
-	 * Verifies if an account exists by its account number.
-	 *
-	 * @param accountNumber the account number to verify.
-	 * @return a ResponseEntity containing a boolean value indicating if the account exists.
-	 */
-	@Operation(summary = "Verify if an account exists by its account number", description =
-			"Returns boolean")
-	@GetMapping("/verify/{accountNumber}")
-	public ResponseEntity<Boolean> verifyAccountByAccountNumber(
-			@PathVariable String accountNumber) {
-		boolean exists = accountService.accountExistsByAccountNumber(accountNumber);
-		return ResponseEntity.ok(exists);
+		return ResponseEntity.ok(activeAccounts);
 	}
 
 }

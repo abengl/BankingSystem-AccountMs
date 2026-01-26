@@ -1,12 +1,13 @@
 package com.alessandragodoy.accountms.service.impl;
 
-import com.alessandragodoy.accountms.controller.dto.AccountDTO;
-import com.alessandragodoy.accountms.controller.dto.CreateAccountDTO;
+import com.alessandragodoy.accountms.adapter.AccountAdapter;
 import com.alessandragodoy.accountms.exception.AccountNotFoundException;
+import com.alessandragodoy.accountms.exception.AccountValidationException;
+import com.alessandragodoy.accountms.exception.CustomerNotFoundException;
 import com.alessandragodoy.accountms.model.Account;
 import com.alessandragodoy.accountms.repository.AccountRepository;
-import com.alessandragodoy.accountms.service.AccountService;
-import com.alessandragodoy.accountms.utility.AccountMapper;
+import com.alessandragodoy.accountms.service.IAccountService;
+import com.alessandragodoy.accountms.utility.DTOMapper;
 import com.alessandragodoy.accountms.utility.AccountNumberGenerator;
 import com.alessandragodoy.accountms.utility.AccountValidation;
 import jakarta.transaction.Transactional;
@@ -20,40 +21,48 @@ import java.util.List;
  */
 @Service
 @RequiredArgsConstructor
-public class AccountServiceImpl implements AccountService {
+public class AccountServiceImpl implements IAccountService {
 
 	private final AccountRepository accountRepository;
-	private final AccountValidation accountValidation;
+	private final AccountAdapter accountAdapter;
 	private final AccountNumberGenerator numberGenerator;
 
 	@Override
-	public List<AccountDTO> getAllAccounts() {
-		return accountRepository.findAll().stream().map(AccountMapper::toDTO).toList();
+	public List<Account> getAllActiveAccounts() throws Exception {
+
+		return accountRepository.findAllByActiveTrue();
 	}
 
 	@Override
-	public AccountDTO getAccountById(Integer accountId) {
-		return accountRepository.findById(accountId).map(AccountMapper::toDTO)
-				.orElseThrow(() -> new AccountNotFoundException("The account with ID " + accountId + " does not " +
-						"exist."));
+	public Account getAccountById(Integer accountId) throws Exception {
+
+		return accountRepository.findById(accountId)
+				.orElseThrow(() -> new AccountNotFoundException("The account with ID " + accountId + " does not exist."));
 	}
 
 	@Override
-	public AccountDTO createAccount(CreateAccountDTO createAccountDTO) {
-		accountValidation.validateAccountData(createAccountDTO);
-		accountValidation.validateCustomerExists(createAccountDTO.customerId());
+	public Account createAccount(Account account) throws Exception {
 
-		Account newAccount = AccountMapper.toCreateEntity(createAccountDTO);
-		newAccount.setAccountNumber(numberGenerator.generate());
-		accountRepository.save(newAccount);
+		if (!accountAdapter.customerExists(account.getCustomerId())) {
+			throw new CustomerNotFoundException("Customer not found for ID: " + account.getCustomerId());
+		}
 
-		return AccountMapper.toDTO(newAccount);
+		account.setAccountNumber(numberGenerator.generate());
+
+		return accountRepository.save(account);
+
 	}
 
-	@Transactional
 	@Override
-	public AccountDTO deposit(Integer accountId, Double amount) {
-		AccountValidation.validateAmount(amount);
+	public Account activateAccount(Integer accountId) throws Exception {
+
+		Account activatedAccount = accountRepository.findById(accountId)
+				.orElseThrow(() -> new AccountNotFoundException("Account not found for ID: " + accountId));
+
+		activatedAccount.setActive(true);
+
+		return accountRepository.save(activatedAccount);
+	}
 
 		Account account = accountRepository.findById(accountId)
 				.orElseThrow(() -> new AccountNotFoundException(
@@ -64,23 +73,10 @@ public class AccountServiceImpl implements AccountService {
 		return AccountMapper.toDTO(account);
 	}
 
-	@Transactional
 	@Override
-	public AccountDTO withdraw(Integer accountId, Double amount) {
-		AccountValidation.validateAmount(amount);
+	public boolean accountIsActiveByAccountId(Integer accountId) throws Exception {
 
-		Account account = accountRepository.findById(accountId)
-				.orElseThrow(() -> new AccountNotFoundException("Withdraw can not continue. Account not found for " +
-						"ID:" +
-						" " + accountId));
-		Double currentBalance = account.getBalance();
-
-		AccountValidation.validateSufficientFunds(account, currentBalance, amount);
-
-		accountRepository.updateBalanceWithdraw(accountId, amount);
-		account.setBalance(accountRepository.getBalanceByAccountId(accountId));
-
-		return AccountMapper.toDTO(account);
+		return accountRepository.existsByAccountIdAndActiveTrue(accountId);
 	}
 
 	@Override
