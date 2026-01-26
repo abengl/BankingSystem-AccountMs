@@ -64,13 +64,50 @@ public class AccountServiceImpl implements IAccountService {
 		return accountRepository.save(activatedAccount);
 	}
 
-		Account account = accountRepository.findById(accountId)
-				.orElseThrow(() -> new AccountNotFoundException(
-						"Deposit can not continue. Account not found for ID: " + accountId));
-		accountRepository.updateBalanceDeposit(accountId, amount);
-		account.setBalance(accountRepository.getBalanceByAccountId(accountId));
+	@Override
+	public Account deactivateAccount(Integer accountId) throws Exception {
 
-		return AccountMapper.toDTO(account);
+		Account deactivatedAccount = accountRepository.findById(accountId)
+				.orElseThrow(() -> new AccountNotFoundException("Account not found for ID: " + accountId));
+
+		if (deactivatedAccount.getBalance() > 0) {
+			throw new AccountValidationException("Account with ID: " + accountId +
+					" cannot be deactivated because it has a positive balance.");
+		}
+
+		deactivatedAccount.setActive(false);
+
+		return accountRepository.save(deactivatedAccount);
+	}
+
+	@Override
+	public void deleteAccountById(Integer accountId) throws Exception {
+
+		Account deletedAccount = accountRepository.findById(accountId).orElseThrow(() -> new AccountNotFoundException("Delete stopped. Account not found for ID: " + accountId));
+
+		if (deletedAccount.getBalance() > 0) {
+			throw new AccountValidationException("Account with ID: " + accountId +
+					" cannot be deleted because it has a positive balance.");
+		}
+
+		accountRepository.delete(deletedAccount);
+	}
+
+	@Override
+	public List<Account> getAccountsByCustomerId(Integer customerId) throws Exception {
+
+		return accountRepository.findAllByCustomerId(customerId)
+				.orElseThrow(() -> new AccountNotFoundException(
+						"No accounts found with ID " + customerId));
+	}
+
+	@Override
+	public double getBalanceByAccountId(Integer accountId) throws Exception {
+
+		return accountRepository.findById(accountId)
+				.map(Account::getBalance)
+				.orElseThrow(() ->
+						new AccountNotFoundException("Account " + accountId + " not found, can not get balance."));
 	}
 
 	@Override
@@ -80,20 +117,35 @@ public class AccountServiceImpl implements IAccountService {
 	}
 
 	@Override
-	public AccountDTO deleteAccountById(Integer accountId) {
-		return accountRepository.findById(accountId).map(existingAccount -> {
-			accountRepository.delete(existingAccount);
-			return AccountMapper.toDTO(existingAccount);
-		}).orElseThrow(() -> new AccountNotFoundException("Delete stopped. Account not found for ID: " + accountId));
+	public void updateBalanceByAccountId(Integer accountId, Double amount) throws Exception {
+		/*
+		Account account = accountRepository.findById(accountId)
+            .orElseThrow(() -> new AccountNotFoundException("Account not found for ID: " + accountId));
+
+    if (operation == BalanceOperation.DEPOSIT) {
+        account.setBalance(account.getBalance() + amount);
+    } else if (operation == BalanceOperation.WITHDRAWAL) {
+        if (account.getBalance() < amount) {
+            throw new AccountValidationException("Insufficient funds for withdrawal.");
+        }
+        account.setBalance(account.getBalance() - amount);
+    } else {
+        throw new IllegalArgumentException("Invalid balance operation.");
+    }
+
+    accountRepository.save(account);
+		 */
+		return;
 	}
 
 	@Override
-	public boolean activeAccountExists(Integer customerId) {
+	public boolean accountIsActiveByCustomerId(Integer customerId) {
 		return accountRepository.existsByCustomerIdAndActiveTrue(customerId);
 	}
 
 	@Override
-	public Double getAccountBalance(String accountNumber) {
+	public double getAccountBalance(String accountNumber) {
+
 		return accountRepository.findByAccountNumber(accountNumber)
 				.map(Account::getBalance)
 				.orElseThrow(() ->
@@ -112,6 +164,39 @@ public class AccountServiceImpl implements IAccountService {
 						"can not update balance."));
 		account.setBalance(account.getBalance() + amount);
 		accountRepository.save(account);
+	}
+
+	@Transactional
+	@Override
+	public Account deposit(Integer accountId, Double amount) {
+		AccountValidation.validateAmount(amount);
+
+		Account account = accountRepository.findById(accountId)
+				.orElseThrow(() -> new AccountNotFoundException(
+						"Deposit can not continue. Account not found for ID: " + accountId));
+		accountRepository.updateBalanceDeposit(accountId, amount);
+		account.setBalance(accountRepository.getBalanceByAccountId(accountId));
+
+		return account;
+	}
+
+	@Transactional
+	@Override
+	public Account withdraw(Integer accountId, Double amount) {
+		AccountValidation.validateAmount(amount);
+
+		Account account = accountRepository.findById(accountId)
+				.orElseThrow(() -> new AccountNotFoundException("Withdraw can not continue. Account not found for " +
+						"ID:" +
+						" " + accountId));
+		Double currentBalance = account.getBalance();
+
+		AccountValidation.validateSufficientFunds(account, currentBalance, amount);
+
+		accountRepository.updateBalanceWithdraw(accountId, amount);
+		account.setBalance(accountRepository.getBalanceByAccountId(accountId));
+
+		return account;
 	}
 
 }

@@ -193,10 +193,21 @@ public class AccountController {
 		return ResponseEntity.ok(active);
 	}
 
+	/**
+	 * Updates the balance of an account by its ID.
+	 *
+	 * @param accountId the ID of the account to update the balance for.
+	 * @param amount    the amount to update the balance by.
+	 * @return {@code ResponseEntity<String>} indicating the success of the operation.
+	 */
+	@Operation(summary = "Updates the account balance by its account id", description =
+			"Returns a String of completion")
 	@PatchMapping("/update-balance/{accountId}")
 	public ResponseEntity<String> updateBalance(@PathVariable Integer accountId,
-												@RequestParam Double amount) {
+												@RequestParam double amount) throws Exception {
+
 		accountService.updateBalanceByAccountId(accountId, amount);
+
 		return ResponseEntity.ok("Balance updated successfully");
 	}
 

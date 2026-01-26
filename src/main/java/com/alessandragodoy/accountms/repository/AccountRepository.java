@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -14,6 +15,37 @@ import java.util.Optional;
  */
 @Repository
 public interface AccountRepository extends JpaRepository<Account, Integer> {
+	/**
+	 * Finds all active accounts.
+	 *
+	 * @return a list of active accounts
+	 */
+	List<Account> findAllByActiveTrue();
+
+	/**
+	 * Finds all accounts by customer ID.
+	 *
+	 * @param customerId the customer ID.
+	 * @return an Optional containing a list of accounts if found, or an empty Optional if not
+	 * found.
+	 */
+	Optional<List<Account>> findAllByCustomerId(Integer customerId);
+
+	/**
+	 * Checks if an account exists by account ID and it is active.
+	 *
+	 * @param accountId the account ID
+	 * @return true if an account is active, false otherwise
+	 */
+	boolean existsByAccountIdAndActiveTrue(Integer accountId);
+
+	/**
+	 * Finds the balance of an account by account ID.
+	 *
+	 * @param accountId the account ID
+	 * @return the balance of the account
+	 */
+	double findBalanceByAccountId(Integer accountId);
 
 	/**
 	 * Checks if an account exists by customer ID.
