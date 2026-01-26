@@ -24,7 +24,7 @@ public class DataLoader implements CommandLineRunner {
 	@Override
 	public void run(String... args) {
 		if (accountRepository.count() == 0) {
-			LOGGER.info("No accounts found, creating initial accounts...");
+			LOGGER.info("STARTING - No accounts found, creating initial accounts...");
 			List<Account> initialAccounts =List.of(
 					Account.builder().accountNumber("A00000000001").balance(1000.0).accountType(AccountType.SAVINGS).customerId(1).build(),
 					Account.builder().accountNumber("A00000000002").balance(1000.0).accountType(AccountType.CHECKING).customerId(1).build(),
@@ -36,9 +36,9 @@ public class DataLoader implements CommandLineRunner {
 					Account.builder().accountNumber("A00000000008").balance(1000.0).accountType(AccountType.SAVINGS).customerId(6).build()
 			);
 			accountRepository.saveAll(initialAccounts);
-			LOGGER.info("Initial accounts added to the database.");
+			LOGGER.info("COMPLETED - Initial accounts added to the database.");
 		} else {
-			LOGGER.info("Accounts already exist, skipping initialization.");
+			LOGGER.info("SKIPPED - Accounts already exist, skipping initialization.");
 		}
 	}
 }
