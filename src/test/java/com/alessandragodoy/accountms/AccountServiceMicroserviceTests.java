@@ -46,10 +46,10 @@ class AccountServiceMicroserviceTests {
 	void AccountService_accountExists_ReturnsBoolean() {
 		// Arrange
 		int customerId = 1;
-		when(accountRepository.existsByCustomerId(customerId)).thenReturn(true);
+		when(accountRepository.existsByCustomerIdAndActiveTrue(customerId)).thenReturn(true);
 
 		// Act
-		boolean response = accountService.accountExists(customerId);
+		boolean response = accountService.activeAccountExists(customerId);
 
 		// Assert
 		assertTrue(response);

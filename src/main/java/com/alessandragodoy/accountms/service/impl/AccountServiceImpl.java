@@ -92,8 +92,8 @@ public class AccountServiceImpl implements AccountService {
 	}
 
 	@Override
-	public boolean accountExists(Integer customerId) {
-		return accountRepository.existsByCustomerId(customerId);
+	public boolean activeAccountExists(Integer customerId) {
+		return accountRepository.existsByCustomerIdAndActiveTrue(customerId);
 	}
 
 	@Override

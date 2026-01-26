@@ -21,7 +21,7 @@ public interface AccountRepository extends JpaRepository<Account, Integer> {
 	 * @param customerId the customer ID
 	 * @return true if an account exists, false otherwise
 	 */
-	boolean existsByCustomerId(Integer customerId);
+	boolean existsByCustomerIdAndActiveTrue(Integer customerId);
 
 	/**
 	 * Updates the balance of an account by depositing an amount.

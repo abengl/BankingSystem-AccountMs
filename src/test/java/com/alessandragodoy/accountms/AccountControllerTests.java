@@ -144,7 +144,7 @@ class AccountControllerTests {
 	void getAccountByCustomerId_ReturnsBoolean() throws Exception {
 		int accountId = 3;
 
-		when(accountService.accountExists(accountId)).thenReturn(true);
+		when(accountService.activeAccountExists(accountId)).thenReturn(true);
 
 		mockMvc.perform(MockMvcRequestBuilders.get("/api/v1/accounts/customer/" + accountId)
 						.accept(MediaType.APPLICATION_JSON))

@@ -71,12 +71,12 @@ public interface AccountService {
 	AccountDTO deleteAccountById(Integer accountId);
 
 	/**
-	 * Checks if an account exists for a given customer ID.
+	 * Checks if active account exists for a given customer ID.
 	 *
 	 * @param customerId the ID of the customer
 	 * @return true if an account exists, false otherwise
 	 */
-	boolean accountExists(Integer customerId);
+	boolean activeAccountExists(Integer customerId);
 
 	/**
 	 * Retrieves the balance of an account by its account number.

@@ -105,15 +105,16 @@ public class AccountController {
 	}
 
 	/**
-	 * Checks if an account exists for a given customer ID.
+	 * Checks if active accounts exist for a given customer ID.
 	 *
 	 * @param customerId the ID of the customer
-	 * @return true if the account exists, false otherwise
+	 * @return true if active account exist, false otherwise
 	 */
-	@Operation(summary = "Verify if a customer has accounts by its id", description = "Returns boolean")
-	@GetMapping("/customer/{customerId}")
+	@Operation(summary = "Verify if a customer has active accounts by its id", description =
+			"Returns boolean")
+	@GetMapping("/active/{customerId}")
 	public boolean getAccountByCustomerId(@PathVariable Integer customerId) {
-		return accountService.accountExists(customerId);
+		return accountService.activeAccountExists(customerId);
 	}
 
 	/**
