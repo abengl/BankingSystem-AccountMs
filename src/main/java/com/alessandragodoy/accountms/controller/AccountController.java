@@ -122,8 +122,7 @@ public class AccountController {
 			"AccountDTO")
 	@GetMapping("/customer/{customerId}")
 	public ResponseEntity<List<AccountDTO>> getAccountsByCustomerId(
-			@PathVariable Integer customerId) throws
-			Exception {
+			@PathVariable Integer customerId) {
 
 		List<AccountDTO> accounts = accountService.getAccountsByCustomerId(customerId)
 				.stream()

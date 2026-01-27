@@ -82,6 +82,16 @@ public class GlobalExceptionHandler {
 		return new ResponseEntity<>(err, HttpStatus.CONFLICT);
 	}
 
+	@ExceptionHandler(CustomerNotFoundException.class)
+	public ResponseEntity<CustomErrorResponse> handleCustomerNotFoundException(
+			CustomerNotFoundException ex, WebRequest request) {
+
+		CustomErrorResponse err = new CustomErrorResponse(LocalDateTime.now(), ex.getMessage(),
+				request.getDescription(false));
+
+		return new ResponseEntity<>(err, HttpStatus.NOT_FOUND);
+	}
+
 	/**
 	 * Handles ExternalServiceException and returns a 503 Service Unavailable response.
 	 *

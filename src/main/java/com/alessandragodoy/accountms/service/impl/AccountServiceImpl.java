@@ -14,6 +14,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Implementation of the AccountService interface.
@@ -45,10 +46,7 @@ public class AccountServiceImpl implements IAccountService {
 		CustomerValidationResponseDTO response =
 				customerServiceClient.validateCustomer(account.getCustomerId());
 
-		if (!response.isExists()) {
-			throw new CustomerNotFoundException(response.getMessage());
-		}
-		if (!response.isActive()) {
+		if (!response.isExists() || !response.isActive()) {
 			throw new AccountValidationException(response.getMessage());
 		}
 
@@ -107,10 +105,13 @@ public class AccountServiceImpl implements IAccountService {
 
 	@Override
 	public List<Account> getAccountsByCustomerId(Integer customerId) {
+		Optional<List<Account>> accounts = accountRepository.findAllByCustomerId(customerId);
 
-		return accountRepository.findAllByCustomerId(customerId)
-				.orElseThrow(() -> new AccountNotFoundException(
-						"No accounts found with ID " + customerId));
+		if(accounts.isEmpty() || accounts.get().isEmpty()) {
+			throw new AccountNotFoundException("No accounts found with customer ID: " + customerId);
+		}
+
+		return accounts.get();
 	}
 
 }
