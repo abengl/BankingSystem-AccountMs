@@ -1,6 +1,7 @@
 package com.alessandragodoy.accountms.service.impl;
 
-import com.alessandragodoy.accountms.adapter.AccountAdapter;
+import com.alessandragodoy.accountms.adapter.CustomerServiceClient;
+import com.alessandragodoy.accountms.controller.dto.CustomerValidationResponseDTO;
 import com.alessandragodoy.accountms.exception.AccountNotFoundException;
 import com.alessandragodoy.accountms.exception.AccountValidationException;
 import com.alessandragodoy.accountms.exception.CustomerNotFoundException;
@@ -22,8 +23,7 @@ import java.util.List;
 public class AccountServiceImpl implements IAccountService {
 
 	private final AccountRepository accountRepository;
-	private final AccountAdapter accountAdapter;
-	private final AccountNumberGenerator numberGenerator;
+	private final CustomerServiceClient customerServiceClient;
 
 	@Override
 	public List<Account> getAllActiveAccounts() throws Exception {
@@ -42,12 +42,17 @@ public class AccountServiceImpl implements IAccountService {
 	@Override
 	public Account createAccount(Account account) throws Exception {
 
-		if (!accountAdapter.customerExists(account.getCustomerId())) {
-			throw new CustomerNotFoundException(
-					"Customer not found for ID: " + account.getCustomerId());
+		CustomerValidationResponseDTO response =
+				customerServiceClient.validateCustomer(account.getCustomerId());
+
+		if(!response.isExists()) {
+			throw new CustomerNotFoundException(response.getMessage());
+		}
+		if (!response.isActive()) {
+			throw new AccountValidationException(response.getMessage());
 		}
 
-		account.setAccountNumber(numberGenerator.generate());
+		account.setAccountNumber(AccountNumberGenerator.generateAccountNumber());
 
 		return accountRepository.save(account);
 
