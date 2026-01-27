@@ -1,9 +1,5 @@
 package com.alessandragodoy.accountms.utility;
 
-import com.alessandragodoy.accountms.controller.dto.AccountDTO;
-import com.alessandragodoy.accountms.controller.dto.CreateAccountDTO;
-import com.alessandragodoy.accountms.model.Account;
-import com.alessandragodoy.accountms.model.AccountType;
 import lombok.NoArgsConstructor;
 import org.modelmapper.ModelMapper;
 
@@ -12,13 +8,13 @@ import org.modelmapper.ModelMapper;
  */
 @NoArgsConstructor
 public class DTOMapper {
-	
+
 	private static final ModelMapper MAPPER = new ModelMapper();
-	
+
 	public static <D, E> D convertToDTO(E entity, Class<D> dtoClass) {
 		return MAPPER.map(entity, dtoClass);
 	}
-	
+
 	public static <E, D> E convertToEntity(D dto, Class<E> entityClass) {
 		return MAPPER.map(dto, entityClass);
 	}

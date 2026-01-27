@@ -1,41 +1,36 @@
 package com.alessandragodoy.accountms.controller.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import jakarta.validation.constraints.*;
+import jakarta.validation.constraints.Digits;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /**
  * DTO for transactions requests.
- *
  */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 public class TransferRequestDTO {
 
-	@NotBlank(message = "Origin Account ID is a required field")
-	@Schema(description = "Unique identifier for the origin account", example = "1")
-	Integer accountId;
+	@NotBlank(message = "Source account ID is a required field")
+	@Positive(message = "Source account ID must be a positive integer")
+	@Schema(description = "Unique identifier for the source account", example = "1")
+	Integer sourceAccountId;
 
-	@NotBlank(message = "Destination Account ID is a required field")
+	@NotBlank(message = "Destination account ID is a required field")
+	@Positive(message = "Destination account ID must be a positive integer")
 	@Schema(description = "Unique identifier for the destination account", example = "2")
-	Integer relatedAccountId;
+	Integer destinationAccountId;
 
 	@NotNull(message = "Amount is a required field")
-	@Positive(message = "The amount must be positive")
-	@Digits(integer = 10, fraction = 2, message = "The amount must be a valid monetary amount " +
-			"with " +
-			"up" +
-			" to 12 digits and 2 decimal places")
+	@Positive(message = "Amount must be positive")
+	@Digits(integer = 10, fraction = 2, message = "The amount must be a valid monetary amount with up to 12 digits and 2 decimal places")
 	@Schema(description = "Amount to deposit", example = "100.0")
 	double amount;
-
-	@NotNull
-	@Pattern(regexp = "TRANSFER_OWN_ACCOUNT|TRANSFER_INTER_ACCOUNT", message = "Transaction type must be either TRANSFER_OWN_ACCOUNT or " +
-			"TRANSFER_INTER_ACCOUNT")
-	@Schema(description = "Description of the transaction type", example = "TRANSFER_INTER_ACCOUNT")
-	String transactionType;
 
 }
