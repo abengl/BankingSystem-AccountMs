@@ -6,6 +6,7 @@ import com.alessandragodoy.accountms.model.Account;
 import com.alessandragodoy.accountms.service.IAccountService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -22,7 +23,7 @@ import static com.alessandragodoy.accountms.utility.DTOMapper.convertToEntity;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/accounts")
-@Tag(name = "Accounts", description = "Controller for Account")
+@Tag(name = "Accounts", description = "Controller for client-facing Account Operations")
 public class AccountController {
 
 	private final IAccountService accountService;
@@ -73,7 +74,8 @@ public class AccountController {
 	@Operation(summary = "Creates an account with specific data", description = "Returns the " +
 			"account created as AccountDTO")
 	@PostMapping
-	public ResponseEntity<AccountDTO> createAccount(@RequestBody CreateAccountDTO createAccountDTO)
+	public ResponseEntity<AccountDTO> createAccount(
+			@Valid @RequestBody CreateAccountDTO createAccountDTO)
 			throws Exception {
 
 		Account account =
@@ -156,76 +158,6 @@ public class AccountController {
 		accountService.deleteAccountById(accountId);
 
 		return ResponseEntity.noContent().build();
-	}
-
-	/**
-	 * Retrieves the balance of an account by its ID.
-	 *
-	 * @param accountId the ID of the account whose balance is to be retrieved.
-	 * @return a {@code ResponseEntity<Double>} containing the account balance.
-	 * @throws Exception if an error occurs while retrieving the balance.
-	 */
-	@Operation(summary = "Retrieve account balance by its id", description = "Returns a double")
-	@GetMapping("balance/{accountId}")
-	public ResponseEntity<Double> getBalanceByAccountId(@PathVariable Integer accountId)
-			throws Exception {
-
-		Double balance = accountService.getBalanceByAccountId(accountId);
-
-		return ResponseEntity.ok(balance);
-	}
-
-	/**
-	 * Checks if an account is active by its ID.
-	 *
-	 * @param accountId the ID of the account to check.
-	 * @return a {@code ResponseEntity<Boolean>} indicating whether the account is active.
-	 * @throws Exception if an error occurs while checking the account status.
-	 */
-	@Operation(summary = "Check if an account is active by its id", description = "Returns " +
-			"boolean")
-	@GetMapping("/active/{accountId}")
-	public ResponseEntity<Boolean> accountIsActive(@PathVariable Integer accountId)
-			throws Exception {
-
-		Boolean active = accountService.accountIsActiveByAccountId(accountId);
-
-		return ResponseEntity.ok(active);
-	}
-
-	/**
-	 * Updates the balance of an account by its ID.
-	 *
-	 * @param accountId the ID of the account to update the balance for.
-	 * @param amount    the amount to update the balance by.
-	 * @return {@code ResponseEntity<String>} indicating the success of the operation.
-	 */
-	@Operation(summary = "Updates the account balance by its account id", description =
-			"Returns a String of completion")
-	@PatchMapping("/update-balance/{accountId}")
-	public ResponseEntity<String> updateBalance(@PathVariable Integer accountId,
-												@RequestParam double amount) throws Exception {
-
-		accountService.updateBalanceByAccountId(accountId, amount);
-
-		return ResponseEntity.ok("Balance updated successfully");
-	}
-
-	/**
-	 * Checks if active accounts exist for a given customer ID.
-	 *
-	 * @param customerId the ID of the customer
-	 * @return {@code ResponseEntity<Boolean>} true if active accounts exist, false otherwise
-	 * @throws Exception if an error occurs while checking for active accounts
-	 */
-	@Operation(summary = "Verify if a customer has active accounts by its id", description =
-			"Returns boolean")
-	@GetMapping("/active/{customerId}")
-	public ResponseEntity<Boolean> getAccountByCustomerId(@PathVariable Integer customerId) throws Exception {
-
-		Boolean activeAccounts = accountService.accountIsActiveByCustomerId(customerId);
-
-		return ResponseEntity.ok(activeAccounts);
 	}
 
 }
