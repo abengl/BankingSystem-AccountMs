@@ -28,7 +28,7 @@ public class InternalAccountController {
 	 * @param transferRequestDTO the data for the transfer request.
 	 * @return {@code ResponseEntity<TransferValidationResponseDTO>} containing validation result.
 	 */
-	@GetMapping("/validate-transfer")
+	@PostMapping("/validate-transfer")
 	public ResponseEntity<TransferValidationResponseDTO> validateTransfer(
 			@Valid @RequestBody TransferRequestDTO transferRequestDTO) {
 
