@@ -26,13 +26,13 @@ public class AccountServiceImpl implements IAccountService {
 	private final CustomerServiceClient customerServiceClient;
 
 	@Override
-	public List<Account> getAllActiveAccounts() throws Exception {
+	public List<Account> getAllActiveAccounts() {
 
 		return accountRepository.findAllByActiveTrue();
 	}
 
 	@Override
-	public Account getAccountById(Integer accountId) throws Exception {
+	public Account getAccountById(Integer accountId) {
 
 		return accountRepository.findById(accountId)
 				.orElseThrow(() -> new AccountNotFoundException(
@@ -40,12 +40,12 @@ public class AccountServiceImpl implements IAccountService {
 	}
 
 	@Override
-	public Account createAccount(Account account) throws Exception {
+	public Account createAccount(Account account) {
 
 		CustomerValidationResponseDTO response =
 				customerServiceClient.validateCustomer(account.getCustomerId());
 
-		if(!response.isExists()) {
+		if (!response.isExists()) {
 			throw new CustomerNotFoundException(response.getMessage());
 		}
 		if (!response.isActive()) {
@@ -60,7 +60,7 @@ public class AccountServiceImpl implements IAccountService {
 
 	@Transactional
 	@Override
-	public Account activateAccount(Integer accountId) throws Exception {
+	public Account activateAccount(Integer accountId) {
 
 		Account activatedAccount = accountRepository.findById(accountId)
 				.orElseThrow(() -> new AccountNotFoundException(
@@ -73,7 +73,7 @@ public class AccountServiceImpl implements IAccountService {
 
 	@Transactional
 	@Override
-	public Account deactivateAccount(Integer accountId) throws Exception {
+	public Account deactivateAccount(Integer accountId) {
 
 		Account deactivatedAccount = accountRepository.findById(accountId)
 				.orElseThrow(() -> new AccountNotFoundException(
@@ -91,7 +91,7 @@ public class AccountServiceImpl implements IAccountService {
 
 	@Transactional
 	@Override
-	public void deleteAccountById(Integer accountId) throws Exception {
+	public void deleteAccountById(Integer accountId) {
 
 		Account deletedAccount = accountRepository.findById(accountId).orElseThrow(
 				() -> new AccountNotFoundException(
@@ -106,7 +106,7 @@ public class AccountServiceImpl implements IAccountService {
 	}
 
 	@Override
-	public List<Account> getAccountsByCustomerId(Integer customerId) throws Exception {
+	public List<Account> getAccountsByCustomerId(Integer customerId) {
 
 		return accountRepository.findAllByCustomerId(customerId)
 				.orElseThrow(() -> new AccountNotFoundException(
