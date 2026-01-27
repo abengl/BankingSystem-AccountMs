@@ -1,13 +1,21 @@
 package com.alessandragodoy.accountms.utility;
 
-import org.springframework.stereotype.Component;
+import java.util.UUID;
 
 /**
- * Component responsible for generating unique account numbers.
+ * Utility class responsible for generating unique account numbers.
  */
-@Component
 public class AccountNumberGenerator {
-	public String generate() {
-		return "A" + (System.currentTimeMillis() / 100);
-	}
+
+    private AccountNumberGenerator() {
+    }
+
+    /**
+     * Generates a unique account number using UUID.
+     *
+     * @return a unique account number as a String
+     */
+    public static String generateAccountNumber() {
+        return "ACC-" + UUID.randomUUID().toString().replace("-", "").substring(0, 20).toUpperCase();
+    }
 }
