@@ -48,7 +48,7 @@ public class InternalAccountController {
 			"Returns a String of completion")
 	@PatchMapping("/execute-transfer")
 	public ResponseEntity<String> updateBalance(
-			@Valid @RequestBody TransferRequestDTO transferRequestDTO) throws Exception {
+			@Valid @RequestBody TransferRequestDTO transferRequestDTO) {
 
 		internalAccountService.transferBalanceBetweenAccounts(transferRequestDTO);
 

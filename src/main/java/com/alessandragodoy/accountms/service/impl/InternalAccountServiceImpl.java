@@ -56,7 +56,7 @@ public class InternalAccountServiceImpl implements IInternalAccountService {
 
 	@Transactional
 	@Override
-	public void transferBalanceBetweenAccounts(TransferRequestDTO transfer) throws Exception {
+	public void transferBalanceBetweenAccounts(TransferRequestDTO transfer) {
 
 		Account sourceAccount = accountRepository.findById(transfer.getSourceAccountId())
 				.orElseThrow(

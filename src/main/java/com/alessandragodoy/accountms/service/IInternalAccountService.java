@@ -2,8 +2,6 @@ package com.alessandragodoy.accountms.service;
 
 import com.alessandragodoy.accountms.controller.dto.TransferRequestDTO;
 import com.alessandragodoy.accountms.controller.dto.TransferValidationResponseDTO;
-import com.alessandragodoy.accountms.exception.AccountNotFoundException;
-import com.alessandragodoy.accountms.exception.InsufficientFundsException;
 
 /**
  * Service interface for internal account operations.
@@ -22,10 +20,8 @@ public interface IInternalAccountService {
 	 * Updates the balance of an account by its ID.
 	 *
 	 * @param transfer the transfer request DTO containing account IDs and amount
-	 * @throws AccountNotFoundException   if the account is not found
-	 * @throws InsufficientFundsException if there are insufficient funds in the source account
 	 */
-	void transferBalanceBetweenAccounts(TransferRequestDTO transfer) throws Exception;
+	void transferBalanceBetweenAccounts(TransferRequestDTO transfer);
 
 	/**
 	 * Checks if active account exists for a given customer ID.
