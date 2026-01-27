@@ -83,23 +83,6 @@ public class GlobalExceptionHandler {
 	}
 
 	/**
-	 * Handles TransferBalanceException and returns a 409 Conflict response.
-	 *
-	 * @param ex      the TransferBalanceException that was thrown
-	 * @param request the web request during which the exception occurred
-	 * @return a ResponseEntity with a 409 status and the exception message
-	 */
-	@ExceptionHandler(TransferBalanceException.class)
-	public ResponseEntity<CustomErrorResponse> handleTransferBalanceException(
-			TransferBalanceException ex, WebRequest request) {
-
-		CustomErrorResponse err = new CustomErrorResponse(LocalDateTime.now(), ex.getMessage(),
-				request.getDescription(false));
-
-		return new ResponseEntity<>(err, HttpStatus.CONFLICT);
-	}
-
-	/**
 	 * Handles ExternalServiceException and returns a 503 Service Unavailable response.
 	 *
 	 * @param e       the ExternalServiceException that was thrown
