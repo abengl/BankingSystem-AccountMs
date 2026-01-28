@@ -47,7 +47,7 @@ public class AccountServiceImpl implements IAccountService {
 		CustomerValidationResponseDTO response =
 				customerServiceClient.validateCustomer(createAccountDTO.getCustomerId());
 
-		if (!response.isExists() || !response.isActive()) {
+		if (!response.getExists() || !response.getIsActive()) {
 			throw new AccountValidationException(response.getMessage());
 		}
 
