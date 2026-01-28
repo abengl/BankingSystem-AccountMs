@@ -1,9 +1,7 @@
 package com.alessandragodoy.accountms.service.impl;
 
 import com.alessandragodoy.accountms.controller.dto.TransferRequestDTO;
-import com.alessandragodoy.accountms.controller.dto.TransferValidationResponseDTO;
-import com.alessandragodoy.accountms.exception.AccountNotFoundException;
-import com.alessandragodoy.accountms.exception.InsufficientFundsException;
+import com.alessandragodoy.accountms.controller.dto.TransferResponseDTO;
 import com.alessandragodoy.accountms.model.Account;
 import com.alessandragodoy.accountms.repository.AccountRepository;
 import com.alessandragodoy.accountms.service.IInternalAccountService;
@@ -14,7 +12,7 @@ import org.springframework.stereotype.Service;
 import java.util.Optional;
 
 /**
- * Implementation of the IntegrationAccountService interface.
+ * Implementation of the IInternalAccountService interface.
  */
 @Service
 @RequiredArgsConstructor
@@ -22,62 +20,57 @@ public class InternalAccountServiceImpl implements IInternalAccountService {
 
 	private final AccountRepository accountRepository;
 
+	@Transactional
 	@Override
-	public TransferValidationResponseDTO validateTransfer(TransferRequestDTO transferRequestDTO) {
+	public TransferResponseDTO executeTransfer(TransferRequestDTO transferRequestDTO) {
 
-		Optional<Account> sourceAccount =
+		Optional<Account> sourceAccountOpt =
 				accountRepository.findById(transferRequestDTO.getSourceAccountId());
-		if (sourceAccount.isEmpty()) {
-			return TransferValidationResponseDTO.invalid(
+
+		if (sourceAccountOpt.isEmpty()) {
+			return TransferResponseDTO.failed("SOURCE_ACCOUNT_NOT_FOUND",
 					"Source account not found for ID: " + transferRequestDTO.getSourceAccountId());
 		}
-		if (!sourceAccount.get().isActive()) {
-			return TransferValidationResponseDTO.invalid(
+
+		Account sourceAccount = sourceAccountOpt.get();
+
+		if (!sourceAccount.isActive()) {
+			return TransferResponseDTO.failed("SOURCE_ACCOUNT_INACTIVE",
 					"Source account is not active for ID: " + transferRequestDTO.getSourceAccountId());
 		}
-		if (sourceAccount.get().getBalance() < transferRequestDTO.getAmount()) {
-			return TransferValidationResponseDTO.invalid(
-					"Insufficient balance in source account for ID: " + transferRequestDTO.getSourceAccountId());
+		if (sourceAccount.getBalance() < transferRequestDTO.getAmount()) {
+			return TransferResponseDTO.failed("INSUFFICIENT_FUNDS",
+					"Insufficient balance in source account: " + sourceAccount.getBalance());
 		}
 
-		Optional<Account> destinationAccount =
+		Optional<Account> destinationAccountOpt =
 				accountRepository.findById(transferRequestDTO.getDestinationAccountId());
-		if (destinationAccount.isEmpty()) {
-			return TransferValidationResponseDTO.invalid(
+
+		if (destinationAccountOpt.isEmpty()) {
+			return TransferResponseDTO.failed("DESTINATION_ACCOUNT_NOT_FOUND",
 					"Destination account not found for ID: " + transferRequestDTO.getDestinationAccountId());
 		}
-		if (!destinationAccount.get().isActive()) {
-			return TransferValidationResponseDTO.invalid(
+
+		Account destinationAccount = destinationAccountOpt.get();
+
+		if (!destinationAccount.isActive()) {
+			return TransferResponseDTO.failed("DESTINATION_ACCOUNT_INACTIVE",
 					"Destination account is not active for ID: " + transferRequestDTO.getDestinationAccountId());
 		}
 
-		return TransferValidationResponseDTO.valid();
-	}
-
-	@Transactional
-	@Override
-	public void transferBalanceBetweenAccounts(TransferRequestDTO transfer) {
-
-		Account sourceAccount = accountRepository.findById(transfer.getSourceAccountId())
-				.orElseThrow(
-						() -> new AccountNotFoundException("Source account not found for ID: " +
-								transfer.getSourceAccountId()));
-
-		Account destinationAccount = accountRepository.findById(transfer.getDestinationAccountId())
-				.orElseThrow(() -> new AccountNotFoundException(
-						"Destination account not found for ID: " +
-								transfer.getDestinationAccountId()));
-
-		if (sourceAccount.getBalance() < transfer.getAmount()) {
-			throw new InsufficientFundsException("Insufficient balance in source account for ID:" +
-					" " + transfer.getSourceAccountId());
-		}
-
-		sourceAccount.setBalance(sourceAccount.getBalance() - transfer.getAmount());
-		destinationAccount.setBalance(destinationAccount.getBalance() + transfer.getAmount());
+		sourceAccount.setBalance(sourceAccount.getBalance() - transferRequestDTO.getAmount());
+		destinationAccount.setBalance(
+				destinationAccount.getBalance() + transferRequestDTO.getAmount());
 
 		accountRepository.save(sourceAccount);
 		accountRepository.save(destinationAccount);
+
+		return TransferResponseDTO.success(
+				sourceAccount.getAccountId(),
+				destinationAccount.getAccountId(),
+				sourceAccount.getBalance(),
+				destinationAccount.getBalance()
+		);
 
 	}
 

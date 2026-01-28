@@ -15,7 +15,6 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 import static com.alessandragodoy.accountms.utility.DTOMapper.convertToDTO;
-import static com.alessandragodoy.accountms.utility.DTOMapper.convertToEntity;
 
 /**
  * Controller for managing accounts.
@@ -74,7 +73,7 @@ public class AccountController {
 			@Valid @RequestBody CreateAccountDTO createAccountDTO) {
 
 		Account account =
-				accountService.createAccount(convertToEntity(createAccountDTO, Account.class));
+				accountService.createAccount(createAccountDTO);
 
 		return ResponseEntity.status(HttpStatus.CREATED)
 				.body(convertToDTO(account, AccountDTO.class));

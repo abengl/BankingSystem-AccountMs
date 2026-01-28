@@ -1,5 +1,6 @@
 package com.alessandragodoy.accountms.service;
 
+import com.alessandragodoy.accountms.controller.dto.CreateAccountDTO;
 import com.alessandragodoy.accountms.model.Account;
 
 import java.util.List;
@@ -26,10 +27,10 @@ public interface IAccountService {
 	/**
 	 * Creates a new account.
 	 *
-	 * @param account containing creation details
+	 * @param createAccountDTO containing creation details
 	 * @return {@code Account} created
 	 */
-	Account createAccount(Account account);
+	Account createAccount(CreateAccountDTO createAccountDTO);
 
 	/**
 	 * Activates an account by its ID.

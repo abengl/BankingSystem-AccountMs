@@ -1,7 +1,7 @@
 package com.alessandragodoy.accountms.controller;
 
 import com.alessandragodoy.accountms.controller.dto.TransferRequestDTO;
-import com.alessandragodoy.accountms.controller.dto.TransferValidationResponseDTO;
+import com.alessandragodoy.accountms.controller.dto.TransferResponseDTO;
 import com.alessandragodoy.accountms.service.IInternalAccountService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -23,36 +23,21 @@ public class InternalAccountController {
 	private final IInternalAccountService internalAccountService;
 
 	/**
-	 * Validates a balance transfer between two accounts.
-	 *
-	 * @param transferRequestDTO the data for the transfer request.
-	 * @return {@code ResponseEntity<TransferValidationResponseDTO>} containing validation result.
-	 */
-	@PostMapping("/validate-transfer")
-	public ResponseEntity<TransferValidationResponseDTO> validateTransfer(
-			@Valid @RequestBody TransferRequestDTO transferRequestDTO) {
-
-		TransferValidationResponseDTO validation =
-				internalAccountService.validateTransfer(transferRequestDTO);
-
-		return ResponseEntity.ok(validation);
-	}
-
-	/**
 	 * Executes a balance transfer between two accounts.
 	 *
 	 * @param transferRequestDTO the data for the transfer request.
 	 * @return {@code ResponseEntity<String>} indicating the success of the operation.
 	 */
 	@Operation(summary = "Executes a balance transfer between two accounts", description =
-			"Returns a String of completion")
+			"Returns a TransferResponseDTO with the result of the operation")
 	@PatchMapping("/execute-transfer")
-	public ResponseEntity<String> updateBalance(
+	public ResponseEntity<TransferResponseDTO> executeTransfer(
 			@Valid @RequestBody TransferRequestDTO transferRequestDTO) {
 
-		internalAccountService.transferBalanceBetweenAccounts(transferRequestDTO);
+		TransferResponseDTO response =
+				internalAccountService.executeTransfer(transferRequestDTO);
 
-		return ResponseEntity.ok("Balance updated successfully");
+		return ResponseEntity.ok(response);
 	}
 
 	/**

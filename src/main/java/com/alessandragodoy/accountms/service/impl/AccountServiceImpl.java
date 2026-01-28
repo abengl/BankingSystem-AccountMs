@@ -1,11 +1,12 @@
 package com.alessandragodoy.accountms.service.impl;
 
 import com.alessandragodoy.accountms.adapter.CustomerServiceClient;
+import com.alessandragodoy.accountms.controller.dto.CreateAccountDTO;
 import com.alessandragodoy.accountms.controller.dto.CustomerValidationResponseDTO;
 import com.alessandragodoy.accountms.exception.AccountNotFoundException;
 import com.alessandragodoy.accountms.exception.AccountValidationException;
-import com.alessandragodoy.accountms.exception.CustomerNotFoundException;
 import com.alessandragodoy.accountms.model.Account;
+import com.alessandragodoy.accountms.model.AccountType;
 import com.alessandragodoy.accountms.repository.AccountRepository;
 import com.alessandragodoy.accountms.service.IAccountService;
 import com.alessandragodoy.accountms.utility.AccountNumberGenerator;
@@ -41,18 +42,23 @@ public class AccountServiceImpl implements IAccountService {
 	}
 
 	@Override
-	public Account createAccount(Account account) {
+	public Account createAccount(CreateAccountDTO createAccountDTO) {
 
 		CustomerValidationResponseDTO response =
-				customerServiceClient.validateCustomer(account.getCustomerId());
+				customerServiceClient.validateCustomer(createAccountDTO.getCustomerId());
 
 		if (!response.isExists() || !response.isActive()) {
 			throw new AccountValidationException(response.getMessage());
 		}
 
-		account.setAccountNumber(AccountNumberGenerator.generateAccountNumber());
-
-		return accountRepository.save(account);
+		return accountRepository.save(new Account(null,
+				AccountNumberGenerator.generateAccountNumber(),
+				createAccountDTO.getBalance(),
+				AccountType.valueOf(createAccountDTO.getAccountType()),
+				createAccountDTO.getCustomerId(),
+				null,
+				null,
+				true));
 
 	}
 
@@ -107,7 +113,7 @@ public class AccountServiceImpl implements IAccountService {
 	public List<Account> getAccountsByCustomerId(Integer customerId) {
 		Optional<List<Account>> accounts = accountRepository.findAllByCustomerId(customerId);
 
-		if(accounts.isEmpty() || accounts.get().isEmpty()) {
+		if (accounts.isEmpty() || accounts.get().isEmpty()) {
 			throw new AccountNotFoundException("No accounts found with customer ID: " + customerId);
 		}
 

@@ -29,8 +29,9 @@ public class TransferRequestDTO {
 
 	@NotNull(message = "Amount is a required field")
 	@Positive(message = "Amount must be positive")
-	@Digits(integer = 10, fraction = 2, message = "The amount must be a valid monetary amount with up to 12 digits and 2 decimal places")
+	@Digits(integer = 10, fraction = 2, message = "The amount must be a valid monetary amount with" +
+			" up to 12 digits and 2 decimal places")
 	@Schema(description = "Amount to deposit", example = "100.0")
-	double amount;
+	Double amount;
 
 }

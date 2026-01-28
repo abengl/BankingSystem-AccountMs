@@ -3,6 +3,7 @@ package com.alessandragodoy.accountms.controller.dto;
 import com.alessandragodoy.accountms.model.AccountType;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.PositiveOrZero;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -22,6 +23,7 @@ public class AccountDTO {
 	@Schema(description = "Account number", example = "A000001")
 	String accountNumber;
 
+	@PositiveOrZero(message = "Balance must be zero or positive")
 	@Schema(description = "Current balance of the account", example = "100.0")
 	Double balance;
 
