@@ -1,10 +1,7 @@
 package com.alessandragodoy.accountms.controller.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import jakarta.validation.constraints.Digits;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Pattern;
-import jakarta.validation.constraints.PositiveOrZero;
+import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -32,7 +29,7 @@ public class CreateAccountDTO {
 	String accountType;
 
 	@NotNull
-	@Pattern(regexp = "\\d+", message = "Customer ID must contain only digits")
+	@Positive(message = "Customer ID must be a positive number")
 	@Schema(description = "Unique identifier for the customer", example = "1")
 	Integer customerId;
 }

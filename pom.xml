@@ -10,7 +10,7 @@
         <relativePath/>
     </parent>
 
-    <groupId>com.alessandragodoy</groupId>
+    <groupId>com.bankingsystem</groupId>
     <artifactId>account-ms</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <name>accountms</name>
@@ -168,13 +168,11 @@
                 <artifactId>jacoco-maven-plugin</artifactId>
                 <version>0.8.12</version>
                 <executions>
-                    <!-- Attach the JaCoCo agent -->
                     <execution>
                         <goals>
                             <goal>prepare-agent</goal>
                         </goals>
                     </execution>
-                    <!-- Generate the coverage report -->
                     <execution>
                         <id>report</id>
                         <phase>test</phase>
@@ -182,25 +180,23 @@
                             <goal>report</goal>
                         </goals>
                         <configuration>
+                            <title>${project.artifactId}</title>
                             <excludes>
-                                <exclude>**/com/alessandragodoy/accountms/configuration/**</exclude>
-                                <exclude>**/com/alessandragodoy/accountms/exception/**</exclude>
-                                <exclude>**/com/alessandragodoy/accountms/utility/**</exclude>
-                                <exclude>**/com/alessandragodoy/accountms/adapter/**</exclude>
-                                <exclude>**/com/alessandragodoy/accountms/model/**</exclude>
-                                <exclude>**/com/alessandragodoy/accountms/controller/dto/TransactionRequestDTO*
+                                <exclude>**/accountms/configuration/**</exclude>
+                                <exclude>**/accountms/exception/**</exclude>
+                                <exclude>**/accountms/utility/**</exclude>
+                                <exclude>**/accountms/adapter/**</exclude>
+                                <exclude>**/accountms/model/**</exclude>
+                                <exclude>**/accountms/controller/dto/**
                                 </exclude>
-                                <exclude>**/com/alessandragodoy/accountms/api/**</exclude>
-                                <exclude>**/com/alessandragodoy/accountms/model/AccountDTO*</exclude>
-                                <exclude>**/com/alessandragodoy/accountms/AccountmsApplication*</exclude>
-                                <exclude>**/com/alessandragodoy/accountms/model/TransactionRequestDTO*</exclude>
-                                <exclude>**/com/alessandragodoy/accountms/model/CreateAccountDTO*</exclude>
+                                <exclude>**/accountms/api/**</exclude>
+                                <exclude>**/accountms/model/**</exclude>
+                                <exclude>**/accountms/AccountmsApplication*</exclude>
                             </excludes>
                         </configuration>
                     </execution>
                 </executions>
                 <configuration>
-                    <!-- Coverage rules -->
                     <rules>
                         <rule>
                             <element>BUNDLE</element>
