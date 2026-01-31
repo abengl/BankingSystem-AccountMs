@@ -1,4 +1,4 @@
-package com.alessandragodoy.accountms.exception;
+package com.alessandragodoy.accountms.dto;
 
 import java.time.LocalDateTime;
 

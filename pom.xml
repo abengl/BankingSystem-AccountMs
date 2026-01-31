@@ -120,27 +120,63 @@
                 <version>7.17.0</version>
                 <executions>
                     <execution>
+                        <id>generate-account-api</id>
                         <goals>
                             <goal>generate</goal>
                         </goals>
                         <configuration>
-                            <inputSpec>${project.basedir}/src/main/resources/openapi.yml</inputSpec>
+                            <inputSpec>${project.basedir}/src/main/resources/openapi/account-api.yml</inputSpec>
                             <generatorName>spring</generatorName>
                             <apiPackage>com.alessandragodoy.accountms.api</apiPackage>
-                            <modelPackage>com.alessandragodoy.accountms.model</modelPackage>
-                            <supportingFilesToGenerate>ApiUtil.java</supportingFilesToGenerate>
+                            <modelPackage>com.alessandragodoy.accountms.dto</modelPackage>
                             <configOptions>
-                                <delegatePattern>true</delegatePattern>
+                                <delegatePattern>false</delegatePattern>
                                 <useSpringBoot3>true</useSpringBoot3>
                                 <interfaceOnly>true</interfaceOnly>
                                 <skipDefaultInterface>true</skipDefaultInterface>
                                 <useJakartaEe>true</useJakartaEe>
+                                <useBeanValidation>false</useBeanValidation>
+                                <useTags>true</useTags>
                             </configOptions>
+                            <generateModels>false</generateModels>
+                            <generateApis>true</generateApis>
+                            <generateModelTests>false</generateModelTests>
+                            <generateApiTests>false</generateApiTests>
+                            <generateSupportingFiles>false</generateSupportingFiles>
+                            <generateModelDocumentation>false</generateModelDocumentation>
+                            <generateApiDocumentation>false</generateApiDocumentation>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>generate-internal-account-api</id>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                        <configuration>
+                            <inputSpec>${project.basedir}/src/main/resources/openapi/internal-account-api.yml</inputSpec>
+                            <generatorName>spring</generatorName>
+                            <apiPackage>com.alessandragodoy.accountms.api.internal</apiPackage>
+                            <modelPackage>com.alessandragodoy.accountms.dto</modelPackage>
+                            <configOptions>
+                                <delegatePattern>false</delegatePattern>
+                                <useSpringBoot3>true</useSpringBoot3>
+                                <interfaceOnly>true</interfaceOnly>
+                                <skipDefaultInterface>true</skipDefaultInterface>
+                                <useJakartaEe>true</useJakartaEe>
+                                <useBeanValidation>false</useBeanValidation>
+                                <useTags>true</useTags>
+                            </configOptions>
+                            <generateModels>false</generateModels>
+                            <generateApis>true</generateApis>
+                            <generateModelTests>false</generateModelTests>
+                            <generateApiTests>false</generateApiTests>
+                            <generateSupportingFiles>false</generateSupportingFiles>
+                            <generateModelDocumentation>false</generateModelDocumentation>
+                            <generateApiDocumentation>false</generateApiDocumentation>
                         </configuration>
                     </execution>
                 </executions>
             </plugin>
-
             <!-- Checkstyle -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -161,7 +197,6 @@
                     </execution>
                 </executions>
             </plugin>
-
             <!--Jacoco-->
             <plugin>
                 <groupId>org.jacoco</groupId>
@@ -195,21 +230,44 @@
                             </excludes>
                         </configuration>
                     </execution>
+                    <execution>
+                        <id>jacoco-check</id>
+                        <goals>
+                            <goal>check</goal>
+                        </goals>
+                        <configuration>
+                            <rules>
+                                <rule>
+                                    <element>CLASS</element>
+                                    <excludes>
+                                        <exclude>*Api*</exclude>
+                                        <exclude>*DTO*</exclude>
+                                        <exclude>*Exception*</exclude>
+                                        <exclude>*Config*</exclude>
+                                        <exclude>*Mapper*</exclude>
+                                        <exclude>*Generator*</exclude>
+                                        <exclude>*DataLoader*</exclude>
+                                        <exclude>*Client*</exclude>
+                                        <exclude>**.model.Account*</exclude>
+                                        <exclude>*MsApplication*</exclude>
+                                    </excludes>
+                                    <limits>
+                                        <limit>
+                                            <counter>LINE</counter>
+                                            <value>COVEREDRATIO</value>
+                                            <minimum>0.70</minimum>
+                                        </limit>
+                                        <limit>
+                                            <counter>INSTRUCTION</counter>
+                                            <value>COVEREDRATIO</value>
+                                            <minimum>0.70</minimum>
+                                        </limit>
+                                    </limits>
+                                </rule>
+                            </rules>
+                        </configuration>
+                    </execution>
                 </executions>
-                <configuration>
-                    <rules>
-                        <rule>
-                            <element>BUNDLE</element>
-                            <limits>
-                                <limit>
-                                    <counter>INSTRUCTION</counter>
-                                    <value>COVEREDRATIO</value>
-                                    <minimum>0.70</minimum>
-                                </limit>
-                            </limits>
-                        </rule>
-                    </rules>
-                </configuration>
             </plugin>
         </plugins>
     </build>

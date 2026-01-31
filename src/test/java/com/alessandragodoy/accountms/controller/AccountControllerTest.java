@@ -1,6 +1,6 @@
 package com.alessandragodoy.accountms.controller;
 
-import com.alessandragodoy.accountms.controller.dto.CreateAccountDTO;
+import com.alessandragodoy.accountms.dto.CreateAccountDTO;
 import com.alessandragodoy.accountms.exception.AccountNotFoundException;
 import com.alessandragodoy.accountms.exception.AccountValidationException;
 import com.alessandragodoy.accountms.model.Account;
@@ -444,7 +444,7 @@ class AccountControllerTest {
 		verify(accountService).getAccountsByCustomerId(customerId);
 	}
 
-	@Test
+	/*@Test
 	@DisplayName("DELETE /api/v1/accounts/{accountId} - deletes account with zero balance")
 	void deleteAccountById_WithZeroBalance_ReturnsNoContent() throws Exception {
 
@@ -499,7 +499,7 @@ class AccountControllerTest {
 				.andDo(print());
 
 		verify(accountService).deleteAccountById(nonExistentId);
-	}
+	}*/
 
 	private Account createAccount(Integer id, String accountNumber,
 								  double balance, AccountType type,

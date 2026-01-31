@@ -1,4 +1,4 @@
-package com.alessandragodoy.accountms.controller.dto;
+package com.alessandragodoy.accountms.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import io.swagger.v3.oas.annotations.media.Schema;

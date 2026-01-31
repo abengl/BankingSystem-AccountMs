@@ -1,8 +1,8 @@
 package com.alessandragodoy.accountms.service.impl;
 
 import com.alessandragodoy.accountms.adapter.CustomerServiceClient;
-import com.alessandragodoy.accountms.controller.dto.CreateAccountDTO;
-import com.alessandragodoy.accountms.controller.dto.CustomerValidationResponseDTO;
+import com.alessandragodoy.accountms.dto.CreateAccountDTO;
+import com.alessandragodoy.accountms.dto.CustomerValidationResponseDTO;
 import com.alessandragodoy.accountms.exception.AccountNotFoundException;
 import com.alessandragodoy.accountms.exception.AccountValidationException;
 import com.alessandragodoy.accountms.model.Account;
@@ -93,7 +93,7 @@ public class AccountServiceImpl implements IAccountService {
 		return accountRepository.save(deactivatedAccount);
 	}
 
-	@Transactional
+/*	@Transactional
 	@Override
 	public void deleteAccountById(Integer accountId) {
 
@@ -107,7 +107,7 @@ public class AccountServiceImpl implements IAccountService {
 		}
 
 		accountRepository.delete(deletedAccount);
-	}
+	}*/
 
 	@Override
 	public List<Account> getAccountsByCustomerId(Integer customerId) {

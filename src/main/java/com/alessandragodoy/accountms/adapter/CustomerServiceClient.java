@@ -1,6 +1,6 @@
 package com.alessandragodoy.accountms.adapter;
 
-import com.alessandragodoy.accountms.controller.dto.CustomerValidationResponseDTO;
+import com.alessandragodoy.accountms.dto.CustomerValidationResponseDTO;
 import com.alessandragodoy.accountms.exception.ExternalServiceException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;

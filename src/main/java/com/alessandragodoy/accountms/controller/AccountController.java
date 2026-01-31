@@ -1,16 +1,17 @@
 package com.alessandragodoy.accountms.controller;
 
-import com.alessandragodoy.accountms.controller.dto.AccountDTO;
-import com.alessandragodoy.accountms.controller.dto.CreateAccountDTO;
+import com.alessandragodoy.accountms.api.AccountApi;
+import com.alessandragodoy.accountms.dto.AccountDTO;
+import com.alessandragodoy.accountms.dto.CreateAccountDTO;
 import com.alessandragodoy.accountms.model.Account;
 import com.alessandragodoy.accountms.service.IAccountService;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
@@ -21,43 +22,22 @@ import static com.alessandragodoy.accountms.utility.DTOMapper.convertToDTO;
  */
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/v1/accounts")
-@Tag(name = "Accounts", description = "Controller for client-facing Account Operations")
-public class AccountController {
+public class AccountController implements AccountApi {
 
 	private final IAccountService accountService;
 
 	/**
-	 * Retrieves all active accounts.
+	 * Activates an account by its ID.
 	 *
-	 * @return {@code ResponseEntity<List<AccountDTO>>} containing a list of accounts.
+	 * @param accountId the ID of the account to activate.
+	 * @return a {@code ResponseEntity<AccountDTO>} containing the activated account.
 	 */
-	@Operation(summary = "Retrieve all active accounts", description = "Returns a list of " +
-			"AccountDTO")
-	@GetMapping
-	public ResponseEntity<List<AccountDTO>> getAllAccounts() {
+	@Override
+	public ResponseEntity<AccountDTO> activateAccount(@PathVariable Integer accountId) {
 
-		List<AccountDTO> accounts = accountService.getAllActiveAccounts()
-				.stream()
-				.map(account -> convertToDTO(account, AccountDTO.class)).toList();
+		Account activatedAccount = accountService.activateAccount(accountId);
 
-		return ResponseEntity.ok(accounts);
-	}
-
-	/**
-	 * Retrieves an account by its ID.
-	 *
-	 * @param accountId the ID of the account to retrieve.
-	 * @return a {@code ResponseEntity<AccountDTO>} containing the account.
-	 */
-	@Operation(summary = "Retrieve account by its id", description = "Returns the found account " +
-			"as AccountDTO")
-	@GetMapping("/{accountId}")
-	public ResponseEntity<AccountDTO> getAccountById(@PathVariable Integer accountId) {
-
-		Account account = accountService.getAccountById(accountId);
-
-		return ResponseEntity.ok(convertToDTO(account, AccountDTO.class));
+		return ResponseEntity.ok(convertToDTO(activatedAccount, AccountDTO.class));
 	}
 
 	/**
@@ -66,9 +46,7 @@ public class AccountController {
 	 * @param createAccountDTO the data transfer object containing the account details.
 	 * @return {@code ResponseEntity<AccountDTO>} containing the created account.
 	 */
-	@Operation(summary = "Creates an account with specific data", description = "Returns the " +
-			"account created as AccountDTO")
-	@PostMapping
+	@Override
 	public ResponseEntity<AccountDTO> createAccount(
 			@Valid @RequestBody CreateAccountDTO createAccountDTO) {
 
@@ -80,30 +58,12 @@ public class AccountController {
 	}
 
 	/**
-	 * Activates an account by its ID.
-	 *
-	 * @param accountId the ID of the account to activate.
-	 * @return a {@code ResponseEntity<AccountDTO>} containing the activated account.
-	 */
-	@Operation(summary = "Activate an account by its id", description = "Returns the activated " +
-			"account as AccountDTO")
-	@PatchMapping("/activate/{accountId}")
-	public ResponseEntity<AccountDTO> activateAccount(@PathVariable Integer accountId) {
-
-		Account activatedAccount = accountService.activateAccount(accountId);
-
-		return ResponseEntity.ok(convertToDTO(activatedAccount, AccountDTO.class));
-	}
-
-	/**
 	 * Deactivates an account by its ID.
 	 *
 	 * @param accountId the ID of the account to deactivate.
 	 * @return a {@code ResponseEntity<AccountDTO>} containing the deactivated account.
 	 */
-	@Operation(summary = "Deactivate an account by its id", description = "Returns the " +
-			"deactivated account as AccountDTO")
-	@PatchMapping("/deactivate/{accountId}")
+	@Override
 	public ResponseEntity<AccountDTO> deactivateAccount(@PathVariable Integer accountId) {
 
 		Account deactivatedAccount = accountService.deactivateAccount(accountId);
@@ -112,14 +72,26 @@ public class AccountController {
 	}
 
 	/**
+	 * Retrieves an account by its ID.
+	 *
+	 * @param accountId the ID of the account to retrieve.
+	 * @return a {@code ResponseEntity<AccountDTO>} containing the account.
+	 */
+	@Override
+	public ResponseEntity<AccountDTO> getAccountById(@PathVariable Integer accountId) {
+
+		Account account = accountService.getAccountById(accountId);
+
+		return ResponseEntity.ok(convertToDTO(account, AccountDTO.class));
+	}
+
+	/**
 	 * Retrieves all accounts associated with a specific customer ID.
 	 *
 	 * @param customerId the ID of the customer whose accounts are to be retrieved.
 	 * @return a {@code ResponseEntity<List<AccountDTO>>} containing a list of accounts.
 	 */
-	@Operation(summary = "Retrieve accounts by customer id", description = "Returns a list of " +
-			"AccountDTO")
-	@GetMapping("/customer/{customerId}")
+	@Override
 	public ResponseEntity<List<AccountDTO>> getAccountsByCustomerId(
 			@PathVariable Integer customerId) {
 
@@ -131,19 +103,26 @@ public class AccountController {
 	}
 
 	/**
-	 * Deletes an account by its ID.
+	 * Retrieves all active accounts.
 	 *
-	 * @param accountId the ID of the account to delete.
-	 * @return {@code ResponseEntity<Void>} an empty response after deleting the account.
+	 * @return {@code ResponseEntity<List<AccountDTO>>} containing a list of accounts.
 	 */
-	@Operation(summary = "Deletes an account", description = "Returns the account deleted as " +
-			"AccountDTO")
-	@DeleteMapping("/{accountId}")
+	@Override
+	public ResponseEntity<List<AccountDTO>> getAllAccounts() {
+
+		List<AccountDTO> accounts = accountService.getAllActiveAccounts()
+				.stream()
+				.map(account -> convertToDTO(account, AccountDTO.class)).toList();
+
+		return ResponseEntity.ok(accounts);
+	}
+
+	/*@Override
 	public ResponseEntity<AccountDTO> deleteAccountById(@PathVariable Integer accountId) {
 
 		accountService.deleteAccountById(accountId);
 
 		return ResponseEntity.noContent().build();
-	}
+	}*/
 
 }

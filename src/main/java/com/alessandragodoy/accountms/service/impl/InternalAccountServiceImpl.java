@@ -1,7 +1,7 @@
 package com.alessandragodoy.accountms.service.impl;
 
-import com.alessandragodoy.accountms.controller.dto.TransferRequestDTO;
-import com.alessandragodoy.accountms.controller.dto.TransferResponseDTO;
+import com.alessandragodoy.accountms.dto.TransferRequestDTO;
+import com.alessandragodoy.accountms.dto.TransferResponseDTO;
 import com.alessandragodoy.accountms.model.Account;
 import com.alessandragodoy.accountms.repository.AccountRepository;
 import com.alessandragodoy.accountms.service.IInternalAccountService;
@@ -23,7 +23,6 @@ public class InternalAccountServiceImpl implements IInternalAccountService {
 	@Transactional
 	@Override
 	public TransferResponseDTO executeTransfer(TransferRequestDTO transferRequestDTO) {
-
 		Optional<Account> sourceAccountOpt =
 				accountRepository.findById(transferRequestDTO.getSourceAccountId());
 

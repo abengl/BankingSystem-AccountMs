@@ -1,4 +1,4 @@
-package com.alessandragodoy.accountms.controller.dto;
+package com.alessandragodoy.accountms.dto;
 
 import com.alessandragodoy.accountms.model.AccountType;
 import com.fasterxml.jackson.annotation.JsonInclude;

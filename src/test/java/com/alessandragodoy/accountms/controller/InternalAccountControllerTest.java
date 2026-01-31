@@ -1,7 +1,7 @@
 package com.alessandragodoy.accountms.controller;
 
-import com.alessandragodoy.accountms.controller.dto.TransferRequestDTO;
-import com.alessandragodoy.accountms.controller.dto.TransferResponseDTO;
+import com.alessandragodoy.accountms.dto.TransferRequestDTO;
+import com.alessandragodoy.accountms.dto.TransferResponseDTO;
 import com.alessandragodoy.accountms.service.IInternalAccountService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.DisplayName;

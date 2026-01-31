@@ -1,7 +1,7 @@
 package com.alessandragodoy.accountms.service;
 
-import com.alessandragodoy.accountms.controller.dto.TransferRequestDTO;
-import com.alessandragodoy.accountms.controller.dto.TransferResponseDTO;
+import com.alessandragodoy.accountms.dto.TransferRequestDTO;
+import com.alessandragodoy.accountms.dto.TransferResponseDTO;
 
 /**
  * Service interface for internal account operations.

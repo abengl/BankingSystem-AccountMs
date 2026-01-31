@@ -1,0 +1,381 @@
+openapi: 3.0.1
+info:
+  title: Banking System - Account Microservice API
+  description: |
+    Client-facing API for managing accounts with CRUD operations.
+    
+    This API provides endpoints for:
+    - Creating new accounts
+    - Retrieving account information
+    - Activating/deactivating accounts
+    - Managing customer accounts
+  contact:
+    name: Alessandra Godoy
+    email: dev@alessandragodoy.com
+  version: 1.0.0
+servers:
+  - url: https://api.banking-system.com
+    description: Production server
+  - url: http://localhost:8086
+    description: Local development server
+tags:
+  - name: Account
+    description: Operations for managing bank accounts
+paths:
+  /api/v1/accounts:
+    get:
+      tags:
+        - Account
+      summary: Retrieve all active accounts
+      description: Returns a list of all active accounts in the system
+      operationId: getAllAccounts
+      responses:
+        '200':
+          description: Successfully retrieved list of accounts
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AccountDTO'
+              examples:
+                accountList:
+                  summary: Example account list
+                  value:
+                    - accountId: 1
+                      accountNumber: "A000001"
+                      balance: 1000.0
+                      accountType: "SAVINGS"
+                      customerId: 1
+                    - accountId: 2
+                      accountNumber: "A000002"
+                      balance: 2500.0
+                      accountType: "CHECKING"
+                      customerId: 2
+    post:
+      tags:
+        - Account
+      summary: Create a new account
+      description: Creates a new bank account for a customer
+      operationId: createAccount
+      requestBody:
+        required: true
+        description: Account data to create
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateAccountDTO'
+            examples:
+              newAccount:
+                summary: New account example
+                value:
+                  balance: 500.0
+                  accountType: "SAVINGS"
+                  customerId: 1
+      responses:
+        '201':
+          description: Account created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccountDTO'
+              examples:
+                createdAccount:
+                  summary: Created account response
+                  value:
+                    accountId: 3
+                    accountNumber: "A000003"
+                    balance: 500.0
+                    accountType: "SAVINGS"
+                    customerId: 1
+        '400':
+          description: Invalid input data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomErrorResponse'
+              examples:
+                validationError:
+                  summary: Validation error example
+                  value:
+                    timestamp: "2026-01-30T10:15:30"
+                    message: "Validation failed"
+                    path: "/api/v1/accounts"
+        '404':
+          description: Customer not found or inactive
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomErrorResponse'
+              examples:
+                customerNotFound:
+                  summary: Customer not found example
+                  value:
+                    timestamp: "2026-01-30T10:15:30"
+                    message: "Customer not found or inactive"
+                    path: "/api/v1/accounts"
+  /api/v1/accounts/{accountId}:
+    get:
+      tags:
+        - Account
+      summary: Retrieve an account by ID
+      description: Returns detailed information about a specific account
+      operationId: getAccountById
+      parameters:
+        - name: accountId
+          in: path
+          required: true
+          description: The unique identifier of the account
+          schema:
+            type: integer
+            format: int32
+            minimum: 1
+          example: 1
+      responses:
+        '200':
+          description: Account found successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccountDTO'
+              examples:
+                accountDetails:
+                  summary: Account details
+                  value:
+                    accountId: 1
+                    accountNumber: "A000001"
+                    balance: 1000.0
+                    accountType: "SAVINGS"
+                    customerId: 1
+        '404':
+          description: Account not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomErrorResponse'
+              examples:
+                notFound:
+                  summary: Account not found
+                  value:
+                    timestamp: "2026-01-30T10:15:30"
+                    message: "The account with ID 999 does not exist."
+                    path: "/api/v1/accounts/999"
+  /api/v1/accounts/activate/{accountId}:
+    patch:
+      tags:
+        - Account
+      summary: Activate an account
+      description: Reactivates a previously deactivated account
+      operationId: activateAccount
+      parameters:
+        - name: accountId
+          in: path
+          required: true
+          description: The unique identifier of the account to activate
+          schema:
+            type: integer
+            format: int32
+            minimum: 1
+          example: 1
+      responses:
+        '200':
+          description: Account activated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccountDTO'
+        '404':
+          description: Account not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomErrorResponse'
+              examples:
+                notFound:
+                  summary: Account not found
+                  value:
+                    timestamp: "2026-01-30T10:15:30"
+                    message: "Account not found for ID: 999"
+                    path: "/api/v1/accounts/activate/999"
+  /api/v1/accounts/deactivate/{accountId}:
+    patch:
+      tags:
+        - Account
+      summary: Deactivate an account
+      description: |
+        Deactivates an account, preventing new operations.
+        An account cannot be deactivated if it has a positive balance.
+      operationId: deactivateAccount
+      parameters:
+        - name: accountId
+          in: path
+          required: true
+          description: The unique identifier of the account to deactivate
+          schema:
+            type: integer
+            format: int32
+            minimum: 1
+          example: 1
+      responses:
+        '200':
+          description: Account deactivated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccountDTO'
+        '404':
+          description: Account not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomErrorResponse'
+              examples:
+                notFound:
+                  summary: Account not found
+                  value:
+                    timestamp: "2026-01-30T10:15:30"
+                    message: "Account not found for ID: 999"
+                    path: "/api/v1/accounts/deactivate/999"
+        '409':
+          description: Account cannot be deactivated due to positive balance
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomErrorResponse'
+              examples:
+                positiveBalance:
+                  summary: Positive balance error
+                  value:
+                    timestamp: "2026-01-30T10:15:30"
+                    message: "Account with ID: 1 cannot be deactivated because it has a positive balance."
+                    path: "/api/v1/accounts/deactivate/1"
+  /api/v1/accounts/customer/{customerId}:
+    get:
+      tags:
+        - Account
+      summary: Retrieve accounts by customer ID
+      description: Returns all accounts associated with a specific customer
+      operationId: getAccountsByCustomerId
+      parameters:
+        - name: customerId
+          in: path
+          required: true
+          description: The unique identifier of the customer
+          schema:
+            type: integer
+            format: int32
+            minimum: 1
+          example: 1
+      responses:
+        '200':
+          description: Successfully retrieved customer accounts
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AccountDTO'
+              examples:
+                customerAccounts:
+                  summary: Customer accounts list
+                  value:
+                    - accountId: 1
+                      accountNumber: "A000001"
+                      balance: 1000.0
+                      accountType: "SAVINGS"
+                      customerId: 1
+                    - accountId: 2
+                      accountNumber: "A000002"
+                      balance: 500.0
+                      accountType: "CHECKING"
+                      customerId: 1
+        '404':
+          description: No accounts found for customer
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomErrorResponse'
+              examples:
+                noAccounts:
+                  summary: No accounts found
+                  value:
+                    timestamp: "2026-01-30T10:15:30"
+                    message: "No accounts found with customer ID: 999"
+                    path: "/api/v1/accounts/customer/999"
+components:
+  schemas:
+    AccountDTO:
+      type: object
+      required:
+        - balance
+        - accountType
+        - customerId
+      properties:
+        accountId:
+          type: integer
+          format: int32
+          description: The unique identifier of the account
+          example: 1
+        accountNumber:
+          type: string
+          description: Account number autogenerated by the system
+          example: "A000001"
+        balance:
+          type: number
+          format: double
+          description: Current balance of the account
+          minimum: 0.0
+          example: 1000.0
+        accountType:
+          type: string
+          description: Type of the account
+          enum:
+            - SAVINGS
+            - CHECKING
+          example: "SAVINGS"
+        customerId:
+          type: integer
+          description: The unique identifier of the customer who owns the account
+          format: int32
+          example: 1
+    CreateAccountDTO:
+      type: object
+      required:
+        - balance
+        - accountType
+        - customerId
+      properties:
+        balance:
+          type: number
+          format: double
+          description: Initial balance of the account
+          minimum: 0.0
+          example: 500.0
+        accountType:
+          type: string
+          description: Type of the account to be created
+          enum:
+            - SAVINGS
+            - CHECKING
+          example: "SAVINGS"
+        customerId:
+          type: integer
+          description: The unique identifier of the customer who will own the account
+          format: int32
+          example: 1
+    CustomErrorResponse:
+      type: object
+      properties:
+        timestamp:
+          type: string
+          format: date-time
+          description: Timestamp when the error occurred
+          example: "2024-01-30T10:15:30"
+        message:
+          type: string
+          description: Detailed error message
+          example: "Account not found"
+        path:
+          type: string
+          description: Request path that caused the error
+          example: "/api/v1/account/999"

@@ -1,6 +1,6 @@
 package com.alessandragodoy.accountms.service;
 
-import com.alessandragodoy.accountms.controller.dto.CreateAccountDTO;
+import com.alessandragodoy.accountms.dto.CreateAccountDTO;
 import com.alessandragodoy.accountms.model.Account;
 
 import java.util.List;
@@ -48,12 +48,7 @@ public interface IAccountService {
 	 */
 	Account deactivateAccount(Integer accountId);
 
-	/**
-	 * Deletes an account by its ID.
-	 *
-	 * @param accountId the ID of the account
-	 */
-	void deleteAccountById(Integer accountId);
+//	void deleteAccountById(Integer accountId);
 
 	/**
 	 * Retrieves all accounts associated with a specific customer ID.
