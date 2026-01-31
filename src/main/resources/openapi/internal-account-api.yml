@@ -1,0 +1,229 @@
+openapi: 3.0.1
+info:
+  title: Banking System - Account Internal API
+  description: |
+    Internal API for microservice-to-microservice communication.
+    
+    This API is used by other microservices to:
+    - Execute transfers between accounts
+    - Validate account existence and status
+    - Check if customers have active accounts
+    
+    **Note**: This API should only be accessible within the internal network.
+  contact:
+    name: Alessandra Godoy
+    email: api@alessandragodoy.com
+  version: 1.2.0
+servers:
+  - url: http://account-service:8086
+    description: Production server
+  - url: http://localhost:8086
+    description: Local development server
+tags:
+  - name: "Internal Account"
+    description: Internal operations for microservice communication
+paths:
+  /api/v1/internal/accounts/execute-transfer:
+    patch:
+      tags:
+        - "Internal Account"
+      summary: Execute a balance transfer between two accounts
+      description: |
+        Executes a transfer between two accounts (own or third-party).
+        Used by the Transaction microservice to process transfer transactions.
+        
+        **Use cases**:
+        - Transfer between own accounts (TRANSFER_OWN_ACCOUNT)
+        - Transfer to third-party accounts (TRANSFER_THIRD_PARTY_ACCOUNT)
+        
+        **Business rules**:
+        - Source account must have sufficient balance
+        - Both accounts must exist and be active
+        - Amount must be positive
+      operationId: executeTransfer
+      requestBody:
+        required: true
+        description: Transfer request details
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TransferRequestDTO'
+            examples:
+              ownAccountTransfer:
+                summary: Transfer between own accounts
+                value:
+                  transactionType: "TRANSFER_OWN_ACCOUNT"
+                  sourceAccountId: 1
+                  destinationAccountId: 2
+                  amount: 100.0
+              thirdPartyTransfer:
+                summary: Transfer to third-party account
+                value:
+                  transactionType: "TRANSFER_THIRD_PARTY_ACCOUNT"
+                  sourceAccountId: 1
+                  destinationAccountId: 3
+                  amount: 50.0
+      responses:
+        '200':
+          description: Transfer executed successfully or failed with details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TransferResponseDTO'
+              examples:
+                successfulTransfer:
+                  summary: Successful transfer
+                  value:
+                    success: true
+                    sourceAccountId: 1
+                    destinationAccountId: 2
+                    finalSourceBalance: 900.0
+                    finalDestinationBalance: 600.0
+                insufficientFunds:
+                  summary: Failed - insufficient funds
+                  value:
+                    success: false
+                    errorCode: "INSUFFICIENT_FUNDS"
+                    errorMessage: "The source account has insufficient funds for this transfer"
+                accountNotFound:
+                  summary: Failed - account not found
+                  value:
+                    success: false
+                    errorCode: "ACCOUNT_NOT_FOUND"
+                    errorMessage: "Source account not found for ID: 999"
+        '400':
+          description: Invalid request data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomErrorResponse'
+              examples:
+                validationError:
+                  summary: Validation error
+                  value:
+                    timestamp: "2026-01-30T10:15:30"
+                    message: "Amount must be positive"
+                    path: "/api/v1/internal/accounts/execute-transfer"
+  /api/v1/internal/accounts/is-active/customer/{customerId}:
+    get:
+      tags:
+        - "Internal Account"
+      summary: Check if customer has active accounts
+      description: |
+        Verifies whether a customer has any active accounts.
+        Used by Customer microservice before deactivating or deleting customers.
+        
+        **Use cases**:
+        - Customer service checks before allowing customer deactivation
+        - Customer service checks before allowing customer deletion
+      operationId: getAccountByCustomerId
+      parameters:
+        - name: customerId
+          in: path
+          required: true
+          description: The unique identifier of the customer
+          schema:
+            type: integer
+            format: int32
+            minimum: 1
+          example: 1
+      responses:
+        '200':
+          description: Boolean indicating if customer has active accounts
+          content:
+            application/json:
+              schema:
+                type: boolean
+              examples:
+                hasActiveAccounts:
+                  summary: Customer has active accounts
+                  value: true
+                noActiveAccounts:
+                  summary: Customer has no active accounts
+                  value: false
+components:
+  schemas:
+    TransferRequestDTO:
+      type: object
+      required:
+        - transactionType
+        - sourceAccountId
+        - destinationAccountId
+        - amount
+      properties:
+        transactionType:
+          type: string
+          description: Type of transaction (e.g., TRANSFER_OWN_ACCOUNT, TRANSFER_THIRD_PARTY_ACCOUNT)
+          pattern: '^(TRANSFER_OWN_ACCOUNT|TRANSFER_THIRD_PARTY_ACCOUNT)$'
+          example: "TRANSFER_OWN_ACCOUNT"
+        sourceAccountId:
+          type: integer
+          format: int32
+          description: ID of the source account
+          minimum: 1
+          example: 1
+        destinationAccountId:
+          type: integer
+          format: int32
+          description: ID of the destination account
+          minimum: 1
+          example: 2
+        amount:
+          type: number
+          format: double
+          description: Amount to be transferred
+          minimum: 0.01
+          example: 100.0
+    TransferResponseDTO:
+      type: object
+      required:
+        - success
+      properties:
+        success:
+          type: boolean
+          description: Indicates if the transfer was successful
+          example: true
+        errorCode:
+          type: string
+          description: Error code if the transfer failed
+          example: "INSUFFICIENT_FUNDS"
+        errorMessage:
+          type: string
+          description: Error message if the transfer failed
+          example: "The source account has insufficient funds for this transfer"
+        sourceAccountId:
+          type: integer
+          format: int32
+          description: ID of the source account
+          example: 1
+        destinationAccountId:
+          type: integer
+          format: int32
+          description: ID of the destination account
+          example: 2
+        finalSourceBalance:
+          type: number
+          format: double
+          description: Final balance of the source account after transfer
+          example: 900.0
+        finalDestinationBalance:
+          type: number
+          format: double
+          description: Final balance of the destination account after transfer
+          example: 600.0
+    CustomErrorResponse:
+      type: object
+      properties:
+        timestamp:
+          type: string
+          format: date-time
+          description: Timestamp when the error occurred
+          example: "2024-01-30T10:15:30"
+        message:
+          type: string
+          description: Detailed error message
+          example: "Amount must be positive"
+        path:
+          type: string
+          description: Request path that caused the error
+          example: "/api/v1/internal/accounts/execute-transfer"

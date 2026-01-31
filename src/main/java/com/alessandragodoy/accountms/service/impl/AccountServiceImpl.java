@@ -1,121 +1,123 @@
 package com.alessandragodoy.accountms.service.impl;
 
-import com.alessandragodoy.accountms.controller.dto.AccountDTO;
-import com.alessandragodoy.accountms.controller.dto.CreateAccountDTO;
+import com.alessandragodoy.accountms.adapter.CustomerServiceClient;
+import com.alessandragodoy.accountms.dto.CreateAccountDTO;
+import com.alessandragodoy.accountms.dto.CustomerValidationResponseDTO;
 import com.alessandragodoy.accountms.exception.AccountNotFoundException;
+import com.alessandragodoy.accountms.exception.AccountValidationException;
 import com.alessandragodoy.accountms.model.Account;
+import com.alessandragodoy.accountms.model.AccountType;
 import com.alessandragodoy.accountms.repository.AccountRepository;
-import com.alessandragodoy.accountms.service.AccountService;
-import com.alessandragodoy.accountms.utility.AccountMapper;
+import com.alessandragodoy.accountms.service.IAccountService;
 import com.alessandragodoy.accountms.utility.AccountNumberGenerator;
-import com.alessandragodoy.accountms.utility.AccountValidation;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Implementation of the AccountService interface.
  */
 @Service
 @RequiredArgsConstructor
-public class AccountServiceImpl implements AccountService {
+public class AccountServiceImpl implements IAccountService {
 
 	private final AccountRepository accountRepository;
-	private final AccountValidation accountValidation;
-	private final AccountNumberGenerator numberGenerator;
+	private final CustomerServiceClient customerServiceClient;
 
 	@Override
-	public List<AccountDTO> getAllAccounts() {
-		return accountRepository.findAll().stream().map(AccountMapper::toDTO).toList();
+	public List<Account> getAllActiveAccounts() {
+
+		return accountRepository.findAllByActiveTrue();
 	}
 
 	@Override
-	public AccountDTO getAccountById(Integer accountId) {
-		return accountRepository.findById(accountId).map(AccountMapper::toDTO)
-				.orElseThrow(() -> new AccountNotFoundException("The account with ID " + accountId + " does not " +
-						"exist."));
-	}
+	public Account getAccountById(Integer accountId) {
 
-	@Override
-	public AccountDTO createAccount(CreateAccountDTO createAccountDTO) {
-		accountValidation.validateAccountData(createAccountDTO);
-		accountValidation.validateCustomerExists(createAccountDTO.customerId());
-
-		Account newAccount = AccountMapper.toCreateEntity(createAccountDTO);
-		newAccount.setAccountNumber(numberGenerator.generate());
-		accountRepository.save(newAccount);
-
-		return AccountMapper.toDTO(newAccount);
-	}
-
-	@Transactional
-	@Override
-	public AccountDTO deposit(Integer accountId, Double amount) {
-		AccountValidation.validateAmount(amount);
-
-		Account account = accountRepository.findById(accountId)
+		return accountRepository.findById(accountId)
 				.orElseThrow(() -> new AccountNotFoundException(
-						"Deposit can not continue. Account not found for ID: " + accountId));
-		accountRepository.updateBalanceDeposit(accountId, amount);
-		account.setBalance(accountRepository.getBalanceByAccountId(accountId));
+						"The account with ID " + accountId + " does not exist."));
+	}
 
-		return AccountMapper.toDTO(account);
+	@Override
+	public Account createAccount(CreateAccountDTO createAccountDTO) {
+
+		CustomerValidationResponseDTO response =
+				customerServiceClient.validateCustomer(createAccountDTO.getCustomerId());
+
+		if (!response.getExists() || !response.getIsActive()) {
+			throw new AccountValidationException(response.getMessage());
+		}
+
+		return accountRepository.save(new Account(null,
+				AccountNumberGenerator.generateAccountNumber(),
+				createAccountDTO.getBalance(),
+				AccountType.valueOf(createAccountDTO.getAccountType()),
+				createAccountDTO.getCustomerId(),
+				null,
+				null,
+				true));
+
 	}
 
 	@Transactional
 	@Override
-	public AccountDTO withdraw(Integer accountId, Double amount) {
-		AccountValidation.validateAmount(amount);
+	public Account activateAccount(Integer accountId) {
 
-		Account account = accountRepository.findById(accountId)
-				.orElseThrow(() -> new AccountNotFoundException("Withdraw can not continue. Account not found for " +
-						"ID:" +
-						" " + accountId));
-		Double currentBalance = account.getBalance();
+		Account activatedAccount = accountRepository.findById(accountId)
+				.orElseThrow(() -> new AccountNotFoundException(
+						"Account not found for ID: " + accountId));
 
-		AccountValidation.validateSufficientFunds(account, currentBalance, amount);
+		activatedAccount.setActive(true);
 
-		accountRepository.updateBalanceWithdraw(accountId, amount);
-		account.setBalance(accountRepository.getBalanceByAccountId(accountId));
-
-		return AccountMapper.toDTO(account);
+		return accountRepository.save(activatedAccount);
 	}
 
+	@Transactional
 	@Override
-	public AccountDTO deleteAccountById(Integer accountId) {
-		return accountRepository.findById(accountId).map(existingAccount -> {
-			accountRepository.delete(existingAccount);
-			return AccountMapper.toDTO(existingAccount);
-		}).orElseThrow(() -> new AccountNotFoundException("Delete stopped. Account not found for ID: " + accountId));
+	public Account deactivateAccount(Integer accountId) {
+
+		Account deactivatedAccount = accountRepository.findById(accountId)
+				.orElseThrow(() -> new AccountNotFoundException(
+						"Account not found for ID: " + accountId));
+
+		if (deactivatedAccount.getBalance() > 0) {
+			throw new AccountValidationException("Account with ID: " + accountId +
+					" cannot be deactivated because it has a positive balance.");
+		}
+
+		deactivatedAccount.setActive(false);
+
+		return accountRepository.save(deactivatedAccount);
 	}
 
+/*	@Transactional
 	@Override
-	public boolean accountExists(Integer customerId) {
-		return accountRepository.existsByCustomerId(customerId);
-	}
+	public void deleteAccountById(Integer accountId) {
+
+		Account deletedAccount = accountRepository.findById(accountId).orElseThrow(
+				() -> new AccountNotFoundException(
+						"Delete stopped. Account not found for ID: " + accountId));
+
+		if (deletedAccount.getBalance() > 0) {
+			throw new AccountValidationException("Account with ID: " + accountId +
+					" cannot be deleted because it has a positive balance.");
+		}
+
+		accountRepository.delete(deletedAccount);
+	}*/
 
 	@Override
-	public Double getAccountBalance(String accountNumber) {
-		return accountRepository.findByAccountNumber(accountNumber)
-				.map(Account::getBalance)
-				.orElseThrow(() ->
-						new AccountNotFoundException("Account " + accountNumber + " not found, can not get balance."));
-	}
+	public List<Account> getAccountsByCustomerId(Integer customerId) {
+		Optional<List<Account>> accounts = accountRepository.findAllByCustomerId(customerId);
 
-	@Override
-	public boolean accountExistsByAccountNumber(String accountNumber) {
-		return accountRepository.existsByAccountNumber(accountNumber);
-	}
+		if (accounts.isEmpty() || accounts.get().isEmpty()) {
+			throw new AccountNotFoundException("No accounts found with customer ID: " + customerId);
+		}
 
-	@Override
-	public void updateBalanceByAccountNumber(String accountNumber, Double amount) {
-		Account account = accountRepository.findByAccountNumber(accountNumber)
-				.orElseThrow(() -> new AccountNotFoundException("Account not found for number: " + accountNumber +
-						"can not update balance."));
-		account.setBalance(account.getBalance() + amount);
-		accountRepository.save(account);
+		return accounts.get();
 	}
 
 }

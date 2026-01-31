@@ -1,161 +1,128 @@
 package com.alessandragodoy.accountms.controller;
 
-import com.alessandragodoy.accountms.controller.dto.AccountDTO;
-import com.alessandragodoy.accountms.controller.dto.CreateAccountDTO;
-import com.alessandragodoy.accountms.controller.dto.TransactionRequestDTO;
-import com.alessandragodoy.accountms.service.AccountService;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.tags.Tag;
+import com.alessandragodoy.accountms.api.AccountApi;
+import com.alessandragodoy.accountms.dto.AccountDTO;
+import com.alessandragodoy.accountms.dto.CreateAccountDTO;
+import com.alessandragodoy.accountms.model.Account;
+import com.alessandragodoy.accountms.service.IAccountService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
+
+import static com.alessandragodoy.accountms.utility.DTOMapper.convertToDTO;
 
 /**
  * Controller for managing accounts.
  */
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/v1/accounts")
-@Tag(name = "Accounts", description = "Controller for Account")
-public class AccountController {
-	private final AccountService accountService;
+public class AccountController implements AccountApi {
+
+	private final IAccountService accountService;
 
 	/**
-	 * Retrieves all accounts.
+	 * Activates an account by its ID.
 	 *
-	 * @return a ResponseEntity containing a list of AccountDTO objects.
+	 * @param accountId the ID of the account to activate.
+	 * @return a {@code ResponseEntity<AccountDTO>} containing the activated account.
 	 */
-	@Operation(summary = "Retrieve all accounts", description = "Returns a list of AccountDTO")
-	@GetMapping
-	public ResponseEntity<List<AccountDTO>> getAllAccounts() {
-		List<AccountDTO> accounts = accountService.getAllAccounts();
-		return ResponseEntity.ok(accounts);
-	}
+	@Override
+	public ResponseEntity<AccountDTO> activateAccount(@PathVariable Integer accountId) {
 
-	/**
-	 * Retrieves an account by its ID.
-	 *
-	 * @param accountId the ID of the account to retrieve.
-	 * @return a ResponseEntity containing the AccountDTO object.
-	 */
-	@Operation(summary = "Retrieve account by its id", description = "Returns the found account as AccountDTO")
-	@GetMapping("/{accountId}")
-	public ResponseEntity<AccountDTO> getAccountById(@PathVariable Integer accountId) {
-		AccountDTO account = accountService.getAccountById(accountId);
-		return ResponseEntity.ok(account);
+		Account activatedAccount = accountService.activateAccount(accountId);
+
+		return ResponseEntity.ok(convertToDTO(activatedAccount, AccountDTO.class));
 	}
 
 	/**
 	 * Creates a new account.
 	 *
 	 * @param createAccountDTO the data transfer object containing the account details.
-	 * @return a ResponseEntity containing the created AccountDTO object.
+	 * @return {@code ResponseEntity<AccountDTO>} containing the created account.
 	 */
-	@Operation(summary = "Creates an account with specific data", description = "Returns the account created as " +
-			"AccountDTO")
-	@PostMapping
-	public ResponseEntity<AccountDTO> createAccount(@RequestBody CreateAccountDTO createAccountDTO) {
-		AccountDTO account = accountService.createAccount(createAccountDTO);
-		return ResponseEntity.ok(account);
+	@Override
+	public ResponseEntity<AccountDTO> createAccount(
+			@Valid @RequestBody CreateAccountDTO createAccountDTO) {
+
+		Account account =
+				accountService.createAccount(createAccountDTO);
+
+		return ResponseEntity.status(HttpStatus.CREATED)
+				.body(convertToDTO(account, AccountDTO.class));
 	}
 
 	/**
-	 * Deposits an amount into the account with the given ID.
+	 * Deactivates an account by its ID.
 	 *
-	 * @param accountId             the ID of the account to deposit into.
-	 * @param transactionRequestDTO the data transfer object containing the deposit amount.
-	 * @return a ResponseEntity containing the updated AccountDTO object.
+	 * @param accountId the ID of the account to deactivate.
+	 * @return a {@code ResponseEntity<AccountDTO>} containing the deactivated account.
 	 */
-	@Operation(summary = "Deposit into an account", description = "Returns the account updated as AccountDTO")
-	@PutMapping("/deposit/{accountId}")
-	public ResponseEntity<AccountDTO> deposit(@PathVariable Integer accountId,
-											  @RequestBody TransactionRequestDTO transactionRequestDTO) {
-		AccountDTO updatedAccount = accountService.deposit(accountId, transactionRequestDTO.amount());
-		return ResponseEntity.ok(updatedAccount);
+	@Override
+	public ResponseEntity<AccountDTO> deactivateAccount(@PathVariable Integer accountId) {
+
+		Account deactivatedAccount = accountService.deactivateAccount(accountId);
+
+		return ResponseEntity.ok(convertToDTO(deactivatedAccount, AccountDTO.class));
 	}
 
 	/**
-	 * Withdraws an amount from the account with the given ID.
+	 * Retrieves an account by its ID.
 	 *
-	 * @param accountId             the ID of the account to withdraw from.
-	 * @param transactionRequestDTO the data transfer object containing the withdrawal amount.
-	 * @return a ResponseEntity containing the updated AccountDTO object.
+	 * @param accountId the ID of the account to retrieve.
+	 * @return a {@code ResponseEntity<AccountDTO>} containing the account.
 	 */
-	@Operation(summary = "Withdraw into an account", description = "Returns the account updated as AccountDTO")
-	@PutMapping("/withdraw/{accountId}")
-	public ResponseEntity<AccountDTO> withdraw(@PathVariable Integer accountId,
-											   @RequestBody TransactionRequestDTO transactionRequestDTO) {
-		AccountDTO updatedAccount = accountService.withdraw(accountId, transactionRequestDTO.amount());
-		return ResponseEntity.ok(updatedAccount);
+	@Override
+	public ResponseEntity<AccountDTO> getAccountById(@PathVariable Integer accountId) {
+
+		Account account = accountService.getAccountById(accountId);
+
+		return ResponseEntity.ok(convertToDTO(account, AccountDTO.class));
 	}
 
 	/**
-	 * Deletes an account by its ID.
+	 * Retrieves all accounts associated with a specific customer ID.
 	 *
-	 * @param accountId the ID of the account to delete.
-	 * @return a ResponseEntity containing the deleted AccountDTO object.
+	 * @param customerId the ID of the customer whose accounts are to be retrieved.
+	 * @return a {@code ResponseEntity<List<AccountDTO>>} containing a list of accounts.
 	 */
-	@Operation(summary = "Deletes an account", description = "Returns the account deleted as AccountDTO")
-	@DeleteMapping("/{accountId}")
+	@Override
+	public ResponseEntity<List<AccountDTO>> getAccountsByCustomerId(
+			@PathVariable Integer customerId) {
+
+		List<AccountDTO> accounts = accountService.getAccountsByCustomerId(customerId)
+				.stream()
+				.map(account -> convertToDTO(account, AccountDTO.class)).toList();
+
+		return ResponseEntity.ok(accounts);
+	}
+
+	/**
+	 * Retrieves all active accounts.
+	 *
+	 * @return {@code ResponseEntity<List<AccountDTO>>} containing a list of accounts.
+	 */
+	@Override
+	public ResponseEntity<List<AccountDTO>> getAllAccounts() {
+
+		List<AccountDTO> accounts = accountService.getAllActiveAccounts()
+				.stream()
+				.map(account -> convertToDTO(account, AccountDTO.class)).toList();
+
+		return ResponseEntity.ok(accounts);
+	}
+
+	/*@Override
 	public ResponseEntity<AccountDTO> deleteAccountById(@PathVariable Integer accountId) {
-		AccountDTO deletedAccount = accountService.deleteAccountById(accountId);
-		return ResponseEntity.ok(deletedAccount);
-	}
 
-	/**
-	 * Checks if an account exists for a given customer ID.
-	 *
-	 * @param customerId the ID of the customer
-	 * @return true if the account exists, false otherwise
-	 */
-	@Operation(summary = "Verify if a customer has accounts by its id", description = "Returns boolean")
-	@GetMapping("/customer/{customerId}")
-	public boolean getAccountByCustomerId(@PathVariable Integer customerId) {
-		return accountService.accountExists(customerId);
-	}
+		accountService.deleteAccountById(accountId);
 
-	/**
-	 * Retrieves the balance of an account by its account number.
-	 *
-	 * @param accountNumber the account number of the account to retrieve the balance for.
-	 * @return a ResponseEntity containing the account balance.
-	 */
-	@Operation(summary = "Obtains the account balance by its account number", description = "Returns a double")
-	@GetMapping("/balance/{accountNumber}")
-	public ResponseEntity<Double> getAccountBalance(@PathVariable String accountNumber) {
-		Double balance = accountService.getAccountBalance(accountNumber);
-		return ResponseEntity.ok(balance);
-	}
-
-	/**
-	 * Verifies if an account exists by its account number.
-	 *
-	 * @param accountNumber the account number to verify.
-	 * @return a ResponseEntity containing a boolean value indicating if the account exists.
-	 */
-	@Operation(summary = "Verify if an account exists by its account number", description = "Returns boolean")
-	@GetMapping("/verify/{accountNumber}")
-	public ResponseEntity<Boolean> verifyAccountByAccountNumber(@PathVariable String accountNumber) {
-		boolean exists = accountService.accountExistsByAccountNumber(accountNumber);
-		return ResponseEntity.ok(exists);
-	}
-
-	/**
-	 * Updates the balance of an account by its account number.
-	 *
-	 * @param accountNumber the account number of the account to update the balance for.
-	 * @param amount        the amount to update the balance by.
-	 * @return a ResponseEntity indicating the success of the operation.
-	 */
-	@Operation(summary = "Updates the account balance by its account number", description = "Returns a String of " +
-			"completion")
-	@PatchMapping("/update/{accountNumber}")
-	public ResponseEntity<String> updateBalanceByAccountNumber(@PathVariable String accountNumber,
-															   @RequestParam Double amount) {
-		accountService.updateBalanceByAccountNumber(accountNumber, amount);
-		return ResponseEntity.ok("Balance updated successfully");
-	}
+		return ResponseEntity.noContent().build();
+	}*/
 
 }

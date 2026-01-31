@@ -1,7 +1,7 @@
 package com.alessandragodoy.accountms.exception;
 
 /**
- * Exception thrown when account validation or the request fails.
+ * Exception thrown when account validation fails.
  */
 public class AccountValidationException extends RuntimeException {
 	public AccountValidationException(String message) {

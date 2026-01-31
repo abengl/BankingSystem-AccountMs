@@ -1,58 +1,160 @@
-# Banking System-Account Microservice
+# Account Microservice - Banking System
 
-This Account microservice is part of a banking system designed to handle CRUD operations for banking accounts. It provides endpoints for creating, retrieving, updating, and deleting accounts, as well as managing transactions associated with each account. This microservice is built using Spring Boot, integrates with MySQL, and follows principles of both Object-Oriented Programming (OOP) and functional programming. Documentation is available via Swagger/OpenAPI, and a Postman collection is provided for testing, as well as, unit tests with JUnit, Mockito. Code coverage is tracked with JaCoCo and code validation with Checkstyle.
+A scalable microservice for managing bank accounts within a distributed banking system. Implements contract-first API design, inter-service transaction processing, and comprehensive account lifecycle management.
 
-## Table of Contents
-- [Technologies and Approaches](#technologies-and-approaches)
-- [UML Diagrams](#uml-diagrams)
-- [Postman](#postman)
-- [Swagger/OpenAPI Documentation](#swaggeropenapi-documentation)
-- [Code Quality and Coverage](#code-quality-and-coverage)
+## 🎯 Overview
 
-## Technologies and Approaches
-- **Spring Boot**: Provides the foundation for creating RESTful APIs and microservices with an embedded server.
-- **OpenAPI/Swagger**: Used for API documentation and testing.
-- **Functional Programming and OOP**: Functional programming techniques are applied for data validation, while OOP is used to structure the main services and domain models.
-- **MySQL Database**: Stores account and transaction information.
-- **Postman**: Used for API testing with a pre-configured collection for CRUD operations.
-- **JUnit-Mockito**: For unit testing the main classes of the service.
-- **JaCoCo-Checkstyle**: To verify code covergae and best practices in code style.
+This microservice handles all account-related operations including account creation, balance management, and transfer execution. It serves both client-facing requests and internal microservice communication, implementing complex business rules for account operations and financial transactions.
 
-## UML Diagrams
-The following UML diagrams illustrate the architecture and data flow of the Account Microservice:
+## 🏗️ Architecture & Design
 
-- **Sequence Diagram**: Details the typical flow of operations between the Account and [Customer microservices](https://github.com/abengl/NTT-Project2-CustomerMS).
-  <img alt="UML sequence diagram" src="https://github.com/abengl/NTT-Project2-AccountMS/blob/a3ccfe7ae3fad6d2d667ecc89dded8d9d2906986/src/main/resources/static/UML_Sequence_Diagram2_Microservices.png" width="500" height="500">
-- **Component Diagram**: Show the overall architecture of the microservices.
-    <img alt="UML sequence diagram" src="https://github.com/abengl/NTT-Project2-AccountMS/blob/a3ccfe7ae3fad6d2d667ecc89dded8d9d2906986/src/main/resources/static/UML_Component_Diagram_Microservices.png" width="800" height="400">
+### Key Features
+- **Contract-First API Design**: OpenAPI 3.0 specifications ensure API consistency and type safety
+- **API Architecture**: Public REST API for clients and internal API for microservice orchestration
+- **Transactional Integrity**: JPA transactions for data consistency during financial operations
+- **Domain-Driven Design**: Clear boundaries between account domain and external services
+- **Service Integration**: Validates customers before account creation, executes transfers for transaction service
 
-## Postman
-A Postman collection is provided to test the Account microservice’s endpoints. Follow these steps:
-1. **Import the Collection**: Download or clone the repository, then import the Postman collection file located in the `/postman` directory.
-2. **Import Environment Variables**: import the environment variables into Postman and set them to run with the test collection.
-3. **Run Tests**: Once configured, you can execute requests to test each endpoint. The collection provides requests for creating, retrieving, updating, and deleting customer records.
+### Technology Stack
+- **Framework**: Spring Boot 3.5.7
+- **Language**: Java 17
+- **Database**: MySQL with JPA/Hibernate
+- **API Documentation**: OpenAPI 3.0 (Swagger UI)
+- **Testing**: JUnit 5, Mockito
+- **Code Quality**: JaCoCo (70% coverage), Checkstyle
+- **Build Tool**: Maven
 
-## Swagger/OpenAPI Documentation
-The Swagger/OpenAPI documentation provides a detailed description of each endpoint, including parameters, request bodies, and response formats.
-1. Ensure the service is running locally on `http://localhost:8086`.
-2. Open a browser and go to: [http://localhost:8086/v1/swagger-ui.html](http://localhost:8086/v1/swagger-ui.html)
-   
-## Code Quality and Coverage
+## 📋 API Endpoints
 
-To maintain code quality and ensure adequate test coverage, the project uses **Checkstyle** for code analysis and **JaCoCo** for test coverage reports. Follow the steps below to run these tools:
+### Client-Facing API (`/api/v1/accounts`)
+- `GET /` - Retrieve all active accounts
+- `GET /{accountId}` - Retrieve account by ID
+- `POST /` - Create new account (validates customer first)
+- `PATCH /activate/{accountId}` - Activate account
+- `PATCH /deactivate/{accountId}` - Deactivate account (requires zero balance)
+- `GET /customer/{customerId}` - Get all accounts for a customer
 
-### Run Checkstyle
-1. Open a terminal and navigate to the project directory.
-2. Run the following command to perform a Checkstyle analysis:
+### Internal API (`/api/v1/internal/accounts`)
+- `PATCH /execute-transfer` - Execute balance transfer between accounts
+- `GET /is-active/customer/{customerId}` - Check if customer has active accounts
+
+## 🚀 Getting Started
+
+### Prerequisites
+- Java 17 or higher
+- Maven 3.8+
+- MySQL 8.0+
+
+### Local Setup
+
+1. **Clone the repository**
    ```bash
-   mvn checkstyle:check
+   git clone https://github.com/abengl/BankingSystem-AccountMs.git
+   cd account-ms
    ```
-3. Review the output in the terminal for any code style violations. The results will also be saved in the target/reports/checkstyle.html file.
-   
-### Run JaCoCo for Test Coverage
-1. In the terminal, run the tests with coverage analysis:
-   ```bash
-   mvn clean test
-   ```
-2. Open the generated report located at `target/site/jacoco/index.html` in your browser to review coverage details.
 
+2. **Configure database**
+   ```properties
+   # application.properties
+   spring.datasource.url=jdbc:mysql://localhost:3306/account_db
+   spring.datasource.username=your_username
+   spring.datasource.password=your_password
+   
+   # Customer service URL for validation
+   customer.ms.url=http://localhost:8085/api/v1/internal/customers/validate-customer
+   ```
+
+3. **Build the project**
+   ```bash
+   mvn clean install
+   ```
+
+4. **Run the application**
+   ```bash
+   mvn spring-boot:run
+   ```
+
+The service will start on `http://localhost:8086`
+
+### API Documentation
+
+Access interactive API documentation at:
+- **Swagger UI**: [http://localhost:8086/swagger-ui.html](http://localhost:8086/swagger-ui.html)
+- **OpenAPI Spec**: [http://localhost:8086/v3/api-docs](http://localhost:8086/v3/api-docs)
+
+## 🧪 Testing
+
+### Run Unit Tests
+```bash
+mvn test
+```
+
+### Generate Coverage Report
+```bash
+mvn clean test jacoco:report
+```
+View report at `target/site/jacoco/index.html`
+
+### Code Quality Check
+```bash
+mvn checkstyle:check
+```
+
+## 📂 Project Structure
+
+```
+account-ms/
+├── src/main/java/com/alessandragodoy/accountms/
+│   ├── api/                    # Generated API interfaces
+│   │   ├── AccountApi.java
+│   │   └── internal/
+│   │       └── InternalAccountApi.java
+│   ├── controller/             # API implementations
+│   │   ├── AccountController.java
+│   │   └── InternalAccountController.java
+│   ├── dto/                   # Data Transfer Objects
+│   ├── service/               # Business logic
+│   │   ├── IAccountService.java
+│   │   ├── IInternalAccountService.java
+│   │   └── impl/
+│   ├── model/                 # JPA entities
+│   ├── repository/           # Data access layer
+│   ├── adapter/              # External service clients
+│   ├── exception/            # Custom exceptions
+│   └── utility/              # Helper classes
+├── src/main/resources/
+│   ├── openapi/              # API contracts
+│   │   ├── account-api.yml
+│   │   └── internal-account-api.yml
+│   └── application.properties
+└── pom.xml
+```
+
+## 🔗 Integration
+
+### Microservice Communication
+
+This service integrates with:
+- **Customer Microservice**: Validates customer existence and status before account creation
+- **Transaction Microservice**: Receives transfer execution requests and updates account balances
+
+## 📊 Code Quality Metrics
+
+- **Test Coverage**: Minimum 70% line and instruction coverage
+- **Code Style**: Google Java Style Guide compliance
+- **Excluded from Coverage**: Configuration, DTOs, generated code, exceptions, utilities
+
+## 🎓 Technical Highlights
+
+- **Contract-First Development**: OpenAPI specs drive API design and implementation
+- **Transactional Consistency**: JPA @Transactional ensures data integrity during transfers
+- **Service Integration**: RESTful communication with Customer microservice
+- **Domain Logic**: Complex business rules for account lifecycle management
+- **Type-Safe APIs**: Generated interfaces ensure compile-time contract validation
+- **Clean Architecture**: Separation of concerns across controller, service, repository layers
+- **Comprehensive Testing**: Unit tests with Mockito, integration scenarios
+
+## 📫 Contact
+
+**Alessandra Godoy**
+- Email: api@alessandragodoy.com
