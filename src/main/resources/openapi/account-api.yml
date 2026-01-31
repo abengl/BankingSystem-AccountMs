@@ -11,8 +11,8 @@ info:
     - Managing customer accounts
   contact:
     name: Alessandra Godoy
-    email: dev@alessandragodoy.com
-  version: 1.0.0
+    email: api@alessandragodoy.com
+  version: 1.2.0
 servers:
   - url: https://api.banking-system.com
     description: Production server

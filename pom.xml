@@ -12,7 +12,7 @@
 
     <groupId>com.bankingsystem</groupId>
     <artifactId>account-ms</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
+    <version>1.2.0</version>
     <name>accountms</name>
     <description>accountms</description>
 

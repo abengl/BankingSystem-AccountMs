@@ -12,11 +12,11 @@ info:
     **Note**: This API should only be accessible within the internal network.
   contact:
     name: Alessandra Godoy
-    email: dev@alessandragodoy.com
-  version: 1.0.0
+    email: api@alessandragodoy.com
+  version: 1.2.0
 servers:
   - url: http://account-service:8086
-    description: Internal Kubernetes service
+    description: Production server
   - url: http://localhost:8086
     description: Local development server
 tags:
