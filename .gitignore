@@ -3,6 +3,11 @@ target/
 !.mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/
 !**/src/test/**/target/
+mvnw.cmd
+mvnw
+.mvn/**
+.gitattributes
+account-ms.iml
 
 ### STS ###
 .apt_generated
