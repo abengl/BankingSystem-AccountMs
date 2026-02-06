@@ -56,7 +56,9 @@ paths:
       tags:
         - Account
       summary: Create a new account
-      description: Creates a new bank account for a customer
+      description: |
+        Creates a new bank account for a customer by interacting with the **Customer Microservice** 
+        to validate the customer ID and ensure the customer exists and is active.
       operationId: createAccount
       requestBody:
         required: true
