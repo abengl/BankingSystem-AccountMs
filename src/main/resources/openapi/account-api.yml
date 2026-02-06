@@ -14,7 +14,7 @@ info:
     email: api@alessandragodoy.com
   version: 1.2.0
 servers:
-  - url: https://api.banking-system.com
+  - url: https://accounts.alessandragodoy.com
     description: Production server
   - url: http://localhost:8086
     description: Local development server
