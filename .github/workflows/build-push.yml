@@ -1,9 +1,9 @@
 name: Build and Push Account MS
 
 on:
-  # Only trigger when code is pushed to main (i.e., when PR is merged)
+  # Only trigger when code is pushed to main
   push:
-    branches: [ main, ms-accounts-deploy ]
+    branches: [ main ]
   workflow_dispatch:
 
 jobs:
