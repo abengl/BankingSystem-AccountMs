@@ -4,6 +4,7 @@ import com.alessandragodoy.accountms.api.internal.InternalAccountApi;
 import com.alessandragodoy.accountms.dto.TransferRequestDTO;
 import com.alessandragodoy.accountms.dto.TransferResponseDTO;
 import com.alessandragodoy.accountms.service.IInternalAccountService;
+import io.swagger.v3.oas.annotations.Hidden;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -16,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @RestController
 @RequiredArgsConstructor
+@Hidden
 public class InternalAccountController implements InternalAccountApi {
 
 	private final IInternalAccountService internalAccountService;
